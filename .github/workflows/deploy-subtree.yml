@@ -28,6 +28,22 @@ jobs:
       - name: Build
         run: npm run build
 
+      - name: Ensure CNAME in dist
+        # Copy the repository CNAME into the built site so Pages serves the custom domain.
+        # If you prefer to provide the domain via a secret, create `CUSTOM_DOMAIN` in the repo secrets.
+        env:
+          CUSTOM_DOMAIN: ${{ secrets.CUSTOM_DOMAIN }}
+        run: |
+          if [ -f CNAME ]; then
+            cp CNAME dist/CNAME
+            echo "Copied CNAME from repo into dist"
+          elif [ -n "$CUSTOM_DOMAIN" ]; then
+            echo "$CUSTOM_DOMAIN" > dist/CNAME
+            echo "Wrote CNAME from CUSTOM_DOMAIN secret into dist"
+          else
+            echo "No CNAME found in repo and CUSTOM_DOMAIN secret not set; continuing without CNAME"
+          fi
+
       - name: Deploy `dist` to gh-pages via subtree
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
