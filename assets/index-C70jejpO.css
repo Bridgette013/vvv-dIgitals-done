@@ -1,0 +1,1 @@
+@tailwind base;@tailwind components;@tailwind utilities;@layer utilities{.text-vvv-gradient{background:linear-gradient(90deg,#e9622d,#6246ea);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}}
