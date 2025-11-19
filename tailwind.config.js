@@ -1,21 +1,12 @@
-/** @type {import('tailwindcss').Config} */
-export default {
-  content: [
-    "./index.html",
-    "./src/**/*.{js,ts,jsx,tsx}",
-  ],
-  theme: {
-    extend: {
-      colors: {
-        'vvv-purple': '#6246EA',
-        'vvv-coral': '#E9622D',
-        'vvv-charcoal': '#0C0C0E',
-        'vvv-surface': '#141418',
-        'vvv-text': '#E9E9E9',
-        'vvv-muted': '#B9B9C0',
-        'vvv-divider': '#24242A',
-      }
-    },
-  },
-  plugins: [],
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer utilities {
+  .text-vvv-gradient {
+    background: linear-gradient(90deg, #E9622D 0%, #6246EA 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
 }
