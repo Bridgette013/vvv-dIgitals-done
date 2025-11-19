@@ -11,6 +11,9 @@ const VVV_COLORS = {
     divider: '#24242A',
 };
 
+// NOTE: The placeholder is used here and MUST be replaced by Vite during build.
+// This is the variable defined in your vite.config.js file.
+const apiKey = '$$VITE_GEMINI_API_KEY$$'; 
 // Access the environment variable provided by Vite.
 const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
 const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
@@ -124,6 +127,7 @@ const App = () => {
     const generateCinematicNarrative = async () => {
         const userQuery = conceptInput.trim();
         // Check if API key was injected successfully during build
+        if (!apiKey || apiKey === '$$VITE_GEMINI_API_KEY$$') {
         if (!apiKey) {
             setNarrativeOutput(<p className="text-vvv-coral">System Error: API key not loaded. Check .env file and build config.</p>);
             return;
