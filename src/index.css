@@ -2,11 +2,106 @@
 @tailwind components;
 @tailwind utilities;
 
+/* -----------------------------
+   VVVDigitals Global Tokens
+------------------------------ */
+:root {
+  --vvv-purple: #6246EA;
+  --vvv-coral: #E9622D;
+  --vvv-charcoal: #0C0C0E;
+  --vvv-surface: #141418;
+  --vvv-text: #E9E9E9;
+  --vvv-muted: #B9B9C0;
+  --vvv-divider: #24242A;
+}
+
+/* Global body styling */
+body {
+  background-color: var(--vvv-charcoal);
+  color: var(--vvv-text);
+  font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    sans-serif;
+  min-height: 100vh;
+}
+
+/* -----------------------------
+   VVVDigitals Utility Layer
+   (kept inside Tailwind's pipeline)
+------------------------------ */
 @layer utilities {
-    .text-vvv-gradient {
-        background: linear-gradient(90deg, #E9622D 0%, #6246EA 100%);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
-    }
+  /* Gradient text used for logo / hero line */
+  .text-vvv-gradient {
+    background: linear-gradient(
+      90deg,
+      var(--vvv-coral) 0%,
+      var(--vvv-purple) 100%
+    );
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    color: transparent;
+  }
+
+  /* Coral CTA button */
+  .btn-coral {
+    background-color: var(--vvv-coral);
+    box-shadow:
+      0 4px 6px -1px rgba(233, 98, 45, 0.4),
+      0 2px 4px -2px rgba(233, 98, 45, 0.4);
+    transition: background-color 0.3s ease, transform 0.1s ease;
+  }
+
+  .btn-coral:hover {
+    background-color: #f77a4a;
+    transform: translateY(-1px);
+  }
+
+  .btn-coral:active {
+    transform: translateY(0);
+  }
+
+  /* Purple primary action button */
+  .btn-purple {
+    background-color: var(--vvv-purple);
+    box-shadow:
+      0 4px 6px -1px rgba(98, 70, 234, 0.4),
+      0 2px 4px -2px rgba(98, 70, 234, 0.4);
+    transition: background-color 0.3s ease, transform 0.1s ease;
+  }
+
+  .btn-purple:hover:enabled {
+    background-color: #7a63eb;
+    transform: translateY(-1px);
+  }
+
+  .btn-purple:active:enabled {
+    transform: translateY(0);
+  }
+
+  .btn-purple:disabled {
+    background-color: #3b308e;
+    cursor: not-allowed;
+    opacity: 0.6;
+    box-shadow: none;
+  }
+
+  /* Loader used next to the button label */
+  .loader {
+    border: 4px solid var(--vvv-surface);
+    border-top: 4px solid var(--vvv-coral);
+    border-radius: 9999px;
+    width: 20px;
+    height: 20px;
+    animation: spin 1s linear infinite;
+  }
+}
+
+/* Spinner keyframes */
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
