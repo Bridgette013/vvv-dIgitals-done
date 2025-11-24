@@ -12,8 +12,15 @@ const VVV_COLORS = {
 };
 
 // --- API Setup ---
-const apiKey = ""; // NOTE: Locals use import.meta.env.VITE_GEMINI_API_KEY
-const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+const apiKey = import.meta.env.VITE_GOOGLE_API_KEY;
+
+if (!apiKey) {
+  console.warn("Google API key missing — AI features disabled.");
+}
+
+const API_URL = apiKey
+  ? `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`
+  : null;
 
 // --- DATA: Services (The Offer) ---
 const systemModules = [
