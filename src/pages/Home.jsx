@@ -191,7 +191,7 @@ const Home = () => {
             <img 
                 src={logo} 
                 alt="VVV Digitals" 
-                className="w-48 md:w-64 h-auto object-contain" 
+                className="w-48 md:w-58 h-48 object-contain" 
             />
         </a>
 
