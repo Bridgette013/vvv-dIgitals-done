@@ -4,8 +4,8 @@ import logo from '../assets/logo.png';
 const Header = () => {
     return (
         <header className="flex items-center justify-between p-4">
-            <img src={logo} alt="Logo" className="h-12" />
-        </header>
+            <img src={logo} alt="Logo" className="w-64 h-auto object-contain" />
+                </header>
     );
 };
 
