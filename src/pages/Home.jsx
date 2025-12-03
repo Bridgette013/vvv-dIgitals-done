@@ -184,8 +184,8 @@ const Home = () => {
             <style>{globalStyles}</style>
 
          {/* --- HERO --- */}
-    <header className="max-w-10xl mx-auto px-6 py-9 flex justify-between items-center sticky top-0 z-50 bg-[#0C0C0E]/90 backdrop-blur-md border-b border-[#24242A]">
-        
+    <header className="max-w-32xl mx-auto px-32 py-9 flex justify-between items-center sticky top-0 z-50 bg-[#0C0C0E]/90 backdrop-blur-md border-b border-[#24242A]">
+    
         {/* REPLACED TEXT WITH LOGO IMAGE BELOW */}
         <a href="#" className="block">
             <img 
