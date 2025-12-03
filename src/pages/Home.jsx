@@ -184,14 +184,14 @@ const Home = () => {
             <style>{globalStyles}</style>
 
          {/* --- HERO --- */}
-    <header className="max-w-32xl mx-auto px-32 py-9 flex justify-between items-center sticky top-0 z-50 bg-[#0C0C0E]/90 backdrop-blur-md border-b border-[#24242A]">
-    
+    <header className="max-w-16 xl mx-auto px-24 py-9 flex justify-between items-center sticky top-0 z-50 bg-[#0C0C0E]/90 backdrop-blur-md border-b border-[#24242A]">
+
         {/* REPLACED TEXT WITH LOGO IMAGE BELOW */}
         <a href="#" className="block">
             <img 
                 src={logo} 
                 alt="VVV Digitals" 
-                className="w-64 md:w-64 h-64 object-contain" 
+                className="w-auto md:w-64 h-64 object-contain" 
             />
         </a>
 
