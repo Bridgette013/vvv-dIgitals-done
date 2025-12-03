@@ -179,31 +179,29 @@ const Home = () => {
         input:focus, textarea:focus, select:focus { outline: none; border-color: #6246EA; }
     `;
 
-    return (
+      return (
         <div className="min-h-screen bg-[#0C0C0E] text-[#E9E9E9] font-sans selection:bg-[#6246EA] selection:text-white">
             <style>{globalStyles}</style>
 
-         {/* --- HERO --- */}
-    <header className="max-w-16 xl mx-auto px-24 py-9 flex justify-between items-center sticky top-0 z-50 bg-[#0C0C0E]/90 backdrop-blur-md border-b border-[#24242A]">
+            <header className="max-w-6xl mx-auto px-6 py-6 flex justify-between items-center sticky top-0 z-50 bg-[#0C0C0E]/90 backdrop-blur-md border-b border-[#24242A]">
+                {/* LOGO: Fallback to text if image missing */}
+                <div className="cursor-pointer hover:opacity-80 transition-opacity flex items-center" onClick={() => setCurrentView('home')}>
+                    {logo ? (
+                        <img src={logo} alt="VVVDigitals" className="h-56 w-auto" />
+                    ) : (
+                        <span className="text-2xl font-extrabold tracking-tighter uppercase text-gradient">VVVDIGITALS</span>
+                    )}
+                </div>
 
-        {/* REPLACED TEXT WITH LOGO IMAGE BELOW */}
-        <a href="#" className="block">
-            <img 
-                src={logo} 
-                alt="VVV Digitals" 
-                className="w-auto md:w-64 h-64 object-contain" 
-            />
-        </a>
+                <nav className="hidden md:flex gap-6 text-xs font-bold tracking-widest">
+                    <a href="#engine" className="hover:text-[#E9622D] transition-colors">ENGINE</a>
+                    <a href="#services" className="hover:text-[#E9622D] transition-colors">SYSTEMS</a>
+                    <a href="#tools" className="hover:text-[#E9622D] transition-colors">TOOLS</a>
+                    <a href="#sprint" className="hover:text-[#E9622D] transition-colors text-[#E9622D]">INITIATE SPRINT</a>
+                </nav>
+            </header>
 
-        <nav className="hidden md:flex gap-6 text-xs font-bold tracking-widest">
-            <a href="#engine" className="hover:text-[#E9622D] transition-colors">ENGINE</a>
-            <a href="#services" className="hover:text-[#E9622D] transition-colors">SYSTEMS</a>
-            <a href="#tools" className="hover:text-[#E9622D] transition-colors">TOOLS</a>
-            <a href="#sprint" className="hover:text-[#E9622D] transition-colors text-[#E9622D]">INITIATE SPRINT</a>
-        </nav>
-    </header>
-
-            <main className="max-w-8xl mx-auto px-8">
+            <main className="max-w-6xl mx-auto px-6">
                 <section className="py-24 md:py-32 text-center">
                     <h1 className="text-5xl md:text-7xl font-black tracking-tight mb-6 leading-tight">
                         <span className="text-gradient block">Commanding Motion</span>
