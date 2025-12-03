@@ -184,14 +184,14 @@ const Home = () => {
             <style>{globalStyles}</style>
 
          {/* --- HERO --- */}
-    <header className="max-w-7xl mx-auto px-6 py-8 flex justify-between items-center sticky top-0 z-50 bg-[#0C0C0E]/90 backdrop-blur-md border-b border-[#24242A]">
+    <header className="max-w-10xl mx-auto px-6 py-9 flex justify-between items-center sticky top-0 z-50 bg-[#0C0C0E]/90 backdrop-blur-md border-b border-[#24242A]">
         
         {/* REPLACED TEXT WITH LOGO IMAGE BELOW */}
         <a href="#" className="block">
             <img 
                 src={logo} 
                 alt="VVV Digitals" 
-                className="w-48 md:w-58 h-48 object-contain" 
+                className="w-64 md:w-64 h-64 object-contain" 
             />
         </a>
 
@@ -203,7 +203,7 @@ const Home = () => {
         </nav>
     </header>
 
-            <main className="max-w-6xl mx-auto px-6">
+            <main className="max-w-8xl mx-auto px-8">
                 <section className="py-24 md:py-32 text-center">
                     <h1 className="text-5xl md:text-7xl font-black tracking-tight mb-6 leading-tight">
                         <span className="text-gradient block">Commanding Motion</span>
