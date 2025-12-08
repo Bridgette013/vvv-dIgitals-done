@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import logo from '../assets/logo.png'; // (Or './assets/logo.png' depending on file location)
+import React, { useState, useEffect } from 'react';
+import logo from '../assets/logo.png';
 
 // --- Global Brand Variables ---
 const VVV_COLORS = {
@@ -12,84 +12,14 @@ const VVV_COLORS = {
     divider: '#24242A',
 };
 
-// --- API Setup ---
-const apiKey = import.meta.env.VITE_GOOGLE_API_KEY;
+// --- API Setup (OpenAI) ---
+const apiKey = import.meta.env.VITE_OPENAI_API_KEY;
 
 if (!apiKey) {
-  console.warn("Google API key missing — AI features disabled.");
+  console.warn("OpenAI API key missing — AI features disabled.");
 }
 
-const API_URL = apiKey
-  ? `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`
-  : null;
-
-// --- DATA: Services (The Offer) ---
-const systemModules = [
-    {
-        id: 'M1',
-        title: 'Brand Encoding',
-        description: 'We codify your voice. No more guessing what your brand sounds like.',
-        icon: '🧬',
-    },
-    {
-        id: 'M2',
-        title: 'Content Sprint',
-        description: '12 branded posts, captions, and visual assets generated in 48 hours.',
-        icon: '⚡',
-    },
-    {
-        id: 'M3',
-        title: 'Infrastructure',
-        description: 'The Highway. We build the Zapier/Notion workflows for you.',
-        icon: '🏗️',
-    }
-];
-
-// --- DATA: Portfolio (The Proof) ---
-const initialDeployments = [
-    {
-        id: 'A1',
-        title: 'Content Automation Pipeline',
-        description: 'Infrastructure for content scaling abstracted into modular data flow. Velocity: high.',
-        systemType: 'AUTOMATION',
-        accentColor: VVV_COLORS.purple,
-    },
-    {
-        id: 'B2',
-        title: 'Brand Linguistic Encoding',
-        description: 'A study in visual architecture, composed with pure language parameters. Artistry applied.',
-        systemType: 'DIGITAL ASSET',
-        accentColor: VVV_COLORS.coral,
-    },
-    {
-        id: 'C3',
-        title: 'Strategic Logic Gamma',
-        description: 'Merging market complexity with perfect solution calculation. Precision-driven outcome.',
-        systemType: 'CONSULTING',
-        accentColor: VVV_COLORS.purple,
-    },
-    {
-        id: 'D4',
-        title: 'Data Synthesis Layer',
-        description: 'Abstract concepts visualized for high-impact content flow, ready for executive review.',
-        systemType: 'DATA FLOW',
-        accentColor: VVV_COLORS.muted,
-    },
-    {
-        id: 'E5',
-        title: 'Infrastructure Architecture',
-        description: 'The fusion of automation and emotion. Poetic coding realized in deployment.',
-        systemType: 'INFRASTRUCTURE',
-        accentColor: VVV_COLORS.muted,
-    },
-    {
-        id: 'F6',
-        title: 'Optimization Logic Suite',
-        description: 'Accelerated project velocity running at the speed of maximum efficiency.',
-        systemType: 'OPTIMIZATION',
-        accentColor: VVV_COLORS.muted,
-    },
-];
+const API_URL = "https://api.openai.com/v1/chat/completions";
 
 // --- HELPER: Fetch Logic ---
 async function exponentialBackoffFetch(url, options, maxRetries = 5) {
@@ -110,62 +40,75 @@ async function exponentialBackoffFetch(url, options, maxRetries = 5) {
     }
 }
 
-// --- COMPONENT: Portfolio Card ---
-const DeploymentCard = ({ deployment }) => {
-    const placeholderUrl = `https://placehold.co/800x600/${VVV_COLORS.surface.substring(1)}/${deployment.accentColor.substring(1)}?text=${deployment.systemType.replace(/ /g, '+')}`;
-
-    return (
-        <div className="group bg-[#141418] rounded-xl overflow-hidden border border-[#24242A] hover:border-[#E9622D] transition-all duration-300">
-            <div className="relative overflow-hidden aspect-video">
-                <img 
-                    src={placeholderUrl} 
-                    alt={deployment.title} 
-                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
-                    onError={(e) => { e.target.onerror = null; e.target.src = 'https://placehold.co/800x600/141418/B9B9C0?text=LOAD+ERROR'; }}
-                />
-                <div className="absolute inset-0 bg-[#6246EA]/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-                    <span className="text-xs font-bold text-white p-2 rounded-full bg-[#E9622D]">VIEW LOGIC</span>
-                </div>
-            </div>
-            <div className="p-6">
-                <h3 className="text-lg font-bold text-white mb-2">{deployment.title}</h3>
-                <p className="text-xs text-[#B9B9C0] leading-relaxed">{deployment.description}</p>
-            </div>
-        </div>
-    );
-};
-
 // --- MAIN APP COMPONENT ---
 const Home = () => {
-    const [conceptInput, setConceptInput] = useState('');
-    const [narrativeOutput, setNarrativeOutput] = useState(null);
+    const [legalInput, setLegalInput] = useState('');
+    const [translation, setTranslation] = useState('');
     const [isLoading, setIsLoading] = useState(false);
+    
+    const MAX_CHARS = 150;
+    const charCount = legalInput.length;
+    
+    const exampleText = "The Indemnifying Party shall indemnify, defend, and hold harmless the Indemnified Party from and against any and all claims...";
 
-    const generateNarrative = async (e) => {
+    useEffect(() => {
+        // Load Tally popup script
+        const script = document.createElement('script');
+        script.src = 'https://tally.so/widgets/embed.js';
+        script.async = true;
+        document.head.appendChild(script);
+        
+        return () => {
+            document.head.removeChild(script);
+        };
+    }, []);
+
+    const handleInputChange = (e) => {
+        const text = e.target.value;
+        if (text.length <= MAX_CHARS) {
+            setLegalInput(text);
+            setTranslation('');
+        }
+    };
+
+    const handleExampleClick = () => {
+        setLegalInput(exampleText);
+        setTranslation('');
+    };
+
+    const translateJargon = async (e) => {
         e.preventDefault();
-        if (!conceptInput.trim()) return;
+        if (!legalInput.trim()) return;
         
         setIsLoading(true);
-        const systemPrompt = `Act as a creative engineer for VVVDigitals. Write a 2-sentence cinematic, high-tech project narrative for the user's concept. Use words like 'velocity', 'architecture', 'scale'.`;
+        const systemPrompt = `You are a plain-English translator for legal and financial contracts. Translate complex legal jargon into simple, clear language that anyone can understand. Be direct and concise.`;
         
         try {
             if (!apiKey) {
                 await new Promise(r => setTimeout(r, 1500));
-                setNarrativeOutput("System Integrity Check: API Key Missing. (This is a simulation of the Poetic Coding Engine).");
+                setTranslation("Demo mode: This tool translates legal jargon into plain English. Add your OpenAI API key to enable real translations.");
             } else {
                 const response = await exponentialBackoffFetch(API_URL, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${apiKey}`
+                    },
                     body: JSON.stringify({
-                        contents: [{ parts: [{ text: conceptInput }] }],
-                        systemInstruction: { parts: [{ text: systemPrompt }] }
+                        model: "gpt-4o-mini",
+                        messages: [
+                            { role: "system", content: systemPrompt },
+                            { role: "user", content: `Translate this legal text to plain English: "${legalInput}"` }
+                        ],
+                        max_tokens: 200,
+                        temperature: 0.3
                     })
                 });
                 const data = await response.json();
-                setNarrativeOutput(data.candidates?.[0]?.content?.parts?.[0]?.text || "Error parsing logic.");
+                setTranslation(data.choices?.[0]?.message?.content || "Error translating text.");
             }
         } catch (err) {
-            setNarrativeOutput("Connection severed. Retrying sequence...");
+            setTranslation("Translation failed. Please try again.");
         } finally {
             setIsLoading(false);
         }
@@ -173,19 +116,21 @@ const Home = () => {
 
     const globalStyles = `
         .text-gradient { background: linear-gradient(90deg, #E9622D 0%, #6246EA 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        .btn-primary { background: linear-gradient(90deg, #E9622D 0%, #6246EA 100%); color: white; font-weight: bold; transition: transform 0.2s; }
+        .btn-primary { background: linear-gradient(90deg, #E9622D 0%, #6246EA 100%); color: white; font-weight: bold; transition: transform 0.2s; border: none; cursor: pointer; }
         .btn-primary:hover { transform: translateY(-2px); }
+        .btn-secondary { border: 2px solid #6246EA; color: #6246EA; background: transparent; font-weight: bold; transition: all 0.2s; }
+        .btn-secondary:hover { background: #6246EA; color: white; }
         input, textarea, select { background: #141418; border: 1px solid #24242A; color: white; }
         input:focus, textarea:focus, select:focus { outline: none; border-color: #6246EA; }
     `;
 
-      return (
+    return (
         <div className="min-h-screen bg-[#0C0C0E] text-[#E9E9E9] font-sans selection:bg-[#6246EA] selection:text-white">
             <style>{globalStyles}</style>
 
-            <header className="max-w-6xl mx-auto px-6 py-6 flex justify-between items-center sticky top-0 z-50 bg-[#0C0C0E]/90 backdrop-blur-md border-b border-[#24242A]">
-                {/* LOGO: Fallback to text if image missing */}
-                <div className="cursor-pointer hover:opacity-80 transition-opacity flex items-center" onClick={() => setCurrentView('home')}>
+            {/* HEADER */}
+            <header className="max-w-4xl mx-auto px-6 py-6 flex justify-between items-center sticky top-0 z-50 bg-[#0C0C0E]/90 backdrop-blur-md border-b border-[#24242A]">
+                <div className="cursor-pointer hover:opacity-80 transition-opacity flex items-center" onClick={() => window.scrollTo(0, 0)}>
                     {logo ? (
                         <img src={logo} alt="VVVDigitals" className="h-56 w-auto" />
                     ) : (
@@ -193,199 +138,366 @@ const Home = () => {
                     )}
                 </div>
 
-                <nav className="hidden md:flex gap-6 text-xs font-bold tracking-widest">
-                    <a href="#engine" className="hover:text-[#E9622D] transition-colors">ENGINE</a>
-                    <a href="#services" className="hover:text-[#E9622D] transition-colors">SYSTEMS</a>
-                    <a href="#tools" className="hover:text-[#E9622D] transition-colors">TOOLS</a>
-                    <a href="#sprint" className="hover:text-[#E9622D] transition-colors text-[#E9622D]">INITIATE SPRINT</a>
-                </nav>
+                <div className="text-sm text-[#B9B9C0]">
+                    <span className="text-xs uppercase tracking-widest block mb-1 text-[#6246EA]">Consulting</span>
+                    <span className="italic">Translating Attorney Jargon Since 2010</span>
+                </div>
             </header>
 
-            <main className="max-w-6xl mx-auto px-6">
+            <main className="max-w-4xl mx-auto px-6">
+                {/* HERO */}
                 <section className="py-24 md:py-32 text-center">
-                    <h1 className="text-5xl md:text-7xl font-black tracking-tight mb-6 leading-tight">
-                        <span className="text-gradient block">Commanding Motion</span>
-                        <span className="block text-white">with Pure Language.</span>
+                    <div className="inline-block px-4 py-1 mb-6 border border-[#6246EA] rounded-full text-xs font-bold text-[#6246EA] tracking-widest">
+                        VVVDigitals Consulting
+                    </div>
+                    
+                    <h1 className="text-4xl md:text-6xl font-black tracking-tight mb-6 leading-tight">
+                        <span className="text-gradient block">Exposing The Cons</span>
+                        <span className="block text-white">In Contracts</span>
                     </h1>
-                    <p className="text-xl text-[#B9B9C0] max-w-2xl mx-auto mb-10">
-                        We don't just design. We engineer high-velocity content systems.
-                        <br />
-                        From raw idea to deployment in 72 hours.
-                    </p>
-                    <a href="#engine" className="btn-primary px-8 py-4 rounded-lg inline-block tracking-widest text-sm">
-                        TEST THE LOGIC
-                    </a>
-                </section>
-
-                {/* --- 1. ENGINE (INITIATION) --- */}
-                <section id="engine" className="mb-32 scroll-mt-24">
-                    <div className="bg-[#141418] p-1 rounded-2xl border border-[#24242A] shadow-2xl overflow-hidden">
-                        <div className="bg-[#0C0C0E] p-8 rounded-xl">
-                            <label className="block text-xs font-mono text-[#6246EA] mb-4 uppercase tracking-widest">
-                                // System Terminal: Initiate Concept
-                            </label>
-                            <form onSubmit={generateNarrative} className="flex flex-col gap-4">
-                                <input 
-                                    type="text" 
-                                    value={conceptInput}
-                                    onChange={(e) => setConceptInput(e.target.value)}
-                                    placeholder="Enter a business challenge (e.g., 'Need viral content for a tech startup')" 
-                                    className="w-full p-4 rounded-lg text-lg placeholder-[#555]"
-                                />
-                                <button type="submit" disabled={isLoading} className="btn-primary py-4 rounded-lg w-full md:w-auto md:self-start px-12">
-                                    {isLoading ? 'PROCESSING...' : 'RUN LOGIC'}
-                                </button>
-                            </form>
-                            {narrativeOutput && (
-                                <div className="mt-8 p-6 border-l-2 border-[#E9622D] bg-[#141418]">
-                                    <p className="font-mono text-sm text-[#E9622D] mb-2">OUTPUT &gt;&gt;</p>
-                                    <p className="text-lg italic opacity-90">{narrativeOutput}</p>
-                                </div>
-                            )}
-                        </div>
-                    </div>
-                </section>
-
-                {/* --- 2. SERVICES (ARCHITECTURE) --- */}
-                <section id="services" className="mb-32 scroll-mt-24">
-                    <h2 className="text-3xl font-bold mb-12 flex items-center gap-4">
-                        <span className="text-[#6246EA]">01.</span> SYSTEM ARCHITECTURE
-                    </h2>
-                    <div className="grid md:grid-cols-3 gap-6">
-                        {systemModules.map(mod => (
-                            <div key={mod.id} className="p-8 bg-[#141418] border border-[#24242A] rounded-xl hover:border-[#6246EA] transition-colors group">
-                                <div className="text-4xl mb-6 group-hover:scale-110 transition-transform duration-300">{mod.icon}</div>
-                                <h3 className="text-xl font-bold mb-3">{mod.title}</h3>
-                                <p className="text-[#B9B9C0] text-sm leading-relaxed">{mod.description}</p>
-                            </div>
-                        ))}
-                    </div>
-                </section>
-
-                {/* --- 3. PORTFOLIO (DEPLOYMENT LOG) --- */}
-                <section id="portfolio" className="mb-32 scroll-mt-24">
-                    <h2 className="text-3xl font-bold mb-12 flex items-center gap-4">
-                        <span className="text-[#E9622D]">02.</span> DEPLOYMENT LOG
-                    </h2>
-                    <div className="grid md:grid-cols-3 gap-6">
-                        {initialDeployments.map(deployment => (
-                            <DeploymentCard key={deployment.id} deployment={deployment} />
-                        ))}
-                    </div>
-                </section>
-
-                {/* --- 4. PRICING (SPRINT PROTOCOLS) --- */}
-                <section id="sprint" className="mb-32 scroll-mt-24">
-                    <h2 className="text-3xl font-bold mb-12 flex items-center gap-4">
-                        <span className="text-[#6246EA]">03.</span> SPRINT PROTOCOLS
-                    </h2>
-                    <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-                        {/* Starter: Workflow Install */}
-                        <div className="p-8 border border-[#24242A] rounded-xl flex flex-col bg-[#0C0C0E]">
-                            <h3 className="text-2xl font-bold mb-2">WORKFLOW INSTALL</h3>
-                            <div className="text-3xl font-mono text-[#6246EA] mb-6">$500</div>
-                            <p className="text-sm text-white mb-6 font-bold">Perfect for fixing one broken system.</p>
-                            <ul className="space-y-3 mb-8 text-sm text-[#B9B9C0] flex-1">
-                                <li>• 1 Core Workflow Rebuild (e.g. Lead Intake)</li>
-                                <li>• Custom Automation Map</li>
-                                <li>• SOP Documentation</li>
-                                <li>• 48-Hour Turnaround</li>
-                            </ul>
-                            <a href="#contact" className="block text-center py-3 border border-[#6246EA] text-[#6246EA] font-bold rounded-lg hover:bg-[#6246EA] hover:text-white transition-all">
-                                INITIATE INSTALL
-                            </a>
-                        </div>
-
-                        {/* Pro: The Engine Build */}
-                        <div className="p-8 border border-[#E9622D] rounded-xl bg-[#141418] relative overflow-hidden flex flex-col transform md:-translate-y-4 shadow-2xl shadow-[#E9622D]/10">
-                            <div className="absolute top-0 right-0 bg-[#E9622D] text-black text-xs font-bold px-3 py-1">MOST POPULAR</div>
-                            <h3 className="text-2xl font-bold mb-2">THE VVVD ENGINE</h3>
-                            <div className="text-3xl font-mono text-[#E9622D] mb-6">$1,200</div>
-                            <p className="text-sm text-white mb-6 font-bold">The complete "Business-in-a-Box" System.</p>
-                            <ul className="space-y-3 mb-8 text-sm text-[#E9E9E9] flex-1">
-                                <li>• Full "Internal OS" Build</li>
-                                <li>• Content Engine + Admin Automation</li>
-                                <li>• Operations Dashboard</li>
-                                <li>• 30 Days of Pre-Loaded Content Prompts</li>
-                                <li>• 72-Hour Deployment</li>
-                            </ul>
-                            <a href="#contact" className="btn-primary block text-center py-3 rounded-lg">
-                                DEPLOY ENGINE
-                            </a>
-                        </div>
-                    </div>
-                </section>
-
-                {/* --- 5. DIGITAL ARSENAL (MICRO-OFFERS) --- */}
-                <section id="tools" className="mb-32 scroll-mt-24">
-                    <h2 className="text-3xl font-bold mb-12 flex items-center gap-4">
-                        <span className="text-[#E9622D]">04.</span> DIGITAL ARSENAL
-                    </h2>
-                    <div className="bg-[#141418] border border-[#24242A] rounded-xl p-8 md:p-12 flex flex-col md:flex-row items-center gap-8">
-                        <div className="flex-1">
-                            <div className="text-[#6246EA] text-xs font-bold tracking-widest mb-2">MICRO-OFFER // INSTANT ACCESS</div>
-                            <h3 className="text-3xl font-black text-white mb-4">THE 48-HOUR PROMPT PACK</h3>
-                            <p className="text-[#B9B9C0] mb-6 leading-relaxed">
-                                Don't need a full build yet? Get the raw code. Access our proprietary library of 50+ high-velocity content prompts designed to generate 30 days of posts in one sitting.
-                            </p>
-                            <ul className="text-sm text-[#E9E9E9] space-y-2 mb-8">
-                                <li className="flex items-center gap-2"><span>⚡</span> 50+ Architecture-Grade Prompts</li>
-                                <li className="flex items-center gap-2"><span>⚡</span> Platform-Agnostic (LinkedIn, X, IG)</li>
-                                <li className="flex items-center gap-2"><span>⚡</span> Instant PDF Download</li>
-                            </ul>
-                            <button className="btn-primary px-8 py-3 rounded-lg w-full md:w-auto">
-                                DOWNLOAD ASSETS ($27)
-                            </button>
-                        </div>
-                        <div className="w-full md:w-1/3 aspect-square bg-[#0C0C0E] border border-[#24242A] rounded-lg flex items-center justify-center relative overflow-hidden group">
-                            {/* Placeholder for Digital Product Image */}
-                            <div className="absolute inset-0 bg-gradient-to-br from-[#6246EA]/20 to-[#E9622D]/20 group-hover:opacity-75 transition-opacity"></div>
-                            <span className="text-6xl">📦</span>
-                        </div>
-                    </div>
-                </section>
-
-                {/* --- 6. CONTACT (BOOKING) --- */}
-                <section id="contact" className="pb-32 text-center max-w-2xl mx-auto scroll-mt-24">
-                    <h2 className="text-4xl font-bold mb-6">READY TO BUILD?</h2>
-                    <p className="text-[#B9B9C0] mb-10">
-                        Fill out the intake log below. We review and deploy.
+                    
+                    <p className="text-lg md:text-xl text-[#E9E9E9] max-w-2xl mx-auto mb-4 leading-relaxed">
+                        I spent <span className="text-[#6246EA] font-bold">15 years in banking and insurance</span> finding where money disappears in fine print.
                     </p>
                     
-                    {/* Netlify Form Setup */}
-                    <form name="contact" method="POST" data-netlify="true" className="text-left space-y-4">
-                        <input type="hidden" name="form-name" value="contact" />
+                    <p className="text-lg md:text-xl text-[#E9E9E9] max-w-2xl mx-auto mb-10 leading-relaxed">
+                        Now I do it for your contracts—<span className="text-[#E9622D] font-bold">before you sign</span>.
+                    </p>
+                    
+                    <button 
+                        data-tally-open="VLGZAy" 
+                        data-tally-layout="modal" 
+                        data-tally-width="1000" 
+                        className="btn-primary px-8 py-4 rounded-lg inline-block tracking-widest text-sm"
+                    >
+                        SEE HOW IT WORKS →
+                    </button>
+                </section>
+
+                {/* FREE TOOL - TRANSLATOR */}
+                <section id="translator" className="mb-32 scroll-mt-24">
+                    <div className="bg-[#141418] border border-[#24242A] rounded-2xl p-8 md:p-12">
+                        <div className="text-center mb-8">
+                            <span className="inline-block px-3 py-1 bg-[#6246EA]/20 border border-[#6246EA] rounded-full text-xs font-bold text-[#6246EA] tracking-widest mb-4">
+                                ✨ FREE TOOL
+                            </span>
+                            <h2 className="text-3xl md:text-4xl font-bold mb-4">
+                                Test The <span className="text-gradient">Translator</span>
+                            </h2>
+                            <p className="text-[#B9B9C0] max-w-xl mx-auto">
+                                Paste confusing contract language. I'll translate it into plain English.
+                            </p>
+                        </div>
+
+                        <form onSubmit={translateJargon} className="space-y-4">
+                            <div>
+                                <div className="flex justify-between items-center mb-2">
+                                    <label className="text-sm font-bold text-[#B9B9C0]">Legal Jargon</label>
+                                    <div className="flex items-center gap-3">
+                                        <span className={`text-xs ${charCount > 140 ? 'text-[#E9622D]' : 'text-[#B9B9C0]'}`}>
+                                            {charCount}/{MAX_CHARS}
+                                        </span>
+                                        <button 
+                                            type="button"
+                                            onClick={handleExampleClick}
+                                            className="text-xs text-[#6246EA] hover:text-[#E9622D] font-bold transition-colors"
+                                        >
+                                            Try Example
+                                        </button>
+                                    </div>
+                                </div>
+                                <textarea 
+                                    value={legalInput}
+                                    onChange={handleInputChange}
+                                    placeholder="e.g., 'The Party of the First Part shall indemnify...'"
+                                    rows="4"
+                                    className="w-full p-4 rounded-lg bg-[#0C0C0E] border border-[#24242A] text-white resize-none"
+                                />
+                            </div>
+
+                            <button 
+                                type="submit" 
+                                disabled={isLoading || !legalInput.trim()}
+                                className="btn-primary w-full py-3 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                                {isLoading ? 'TRANSLATING...' : 'TRANSLATE TO ENGLISH'}
+                            </button>
+                        </form>
+
+                        {translation && (
+                            <div className="mt-6 p-6 bg-[#0C0C0E] border-l-2 border-[#E9622D] rounded-lg">
+                                <p className="text-xs font-mono text-[#E9622D] mb-2 uppercase tracking-widest">Plain English:</p>
+                                <p className="text-white leading-relaxed">{translation}</p>
+                            </div>
+                        )}
+                    </div>
+                </section>
+
+                {/* THE GAP YOUR ATTORNEY LEAVES */}
+                <section id="the-gap" className="mb-32 scroll-mt-24">
+                    <h2 className="text-3xl md:text-4xl font-bold mb-12 text-center">
+                        The Gap <span className="text-gradient">Your Attorney Leaves</span>
+                    </h2>
+                    
+                    <div className="bg-[#141418] border border-[#24242A] rounded-xl p-8 md:p-12 space-y-6">
+                        <p className="text-lg text-[#E9E9E9] leading-relaxed">
+                            Here's the truth about working with attorneys:
+                        </p>
                         
-                        <div className="grid md:grid-cols-2 gap-4">
-                            <div>
-                                <label className="block text-xs font-bold text-[#B9B9C0] mb-1">NAME / CALLSIGN</label>
-                                <input type="text" name="name" required className="w-full p-3 rounded bg-[#0C0C0E] border border-[#24242A]" />
+                        <p className="text-lg text-[#E9E9E9] leading-relaxed">
+                            They review your contract. They might catch the big stuff. But then they hand it back and say <span className="text-[#B9B9C0] italic">"looks fine"</span> or <span className="text-[#B9B9C0] italic">"you should negotiate clause 7."</span>
+                        </p>
+
+                        <div className="border-l-2 border-[#E9622D] pl-6 my-8">
+                            <h3 className="text-xl font-bold text-white mb-4">What they DON'T do:</h3>
+                            <ul className="space-y-3 text-[#E9E9E9]">
+                                <li>• Sit with you for 2 hours explaining every single clause</li>
+                                <li>• Translate the jargon into language you actually understand</li>
+                                <li>• Walk through what each section means for YOUR specific situation</li>
+                                <li>• Answer your "dumb" questions without billing you $400/hour</li>
+                            </ul>
+                        </div>
+
+                        <p className="text-xl text-[#E9622D] font-bold">
+                            They expect you to have "done your research."
+                        </p>
+                        
+                        <p className="text-lg text-[#E9E9E9] leading-relaxed">
+                            But nobody teaches you how to read a 47-page contract.
+                        </p>
+                        
+                        <p className="text-xl text-white font-bold mt-8">
+                            That's where I come in.
+                        </p>
+                    </div>
+                </section>
+
+                {/* SERVICES / PRICING */}
+                <section id="services" className="mb-32 scroll-mt-24">
+                    <h2 className="text-3xl md:text-4xl font-bold mb-4 text-center">
+                        <span className="text-gradient">How I Help</span>
+                    </h2>
+                    <p className="text-center text-[#B9B9C0] mb-12 max-w-2xl mx-auto">
+                        Your attorney reviews contracts. I explain them.
+                    </p>
+
+                    <div className="space-y-6">
+                        {/* Tier 1: Audit Call */}
+                        <div className="bg-[#141418] border border-[#24242A] rounded-xl p-8 hover:border-[#6246EA] transition-colors">
+                            <div className="flex justify-between items-start mb-4">
+                                <div>
+                                    <h3 className="text-2xl font-bold text-white mb-2">Contract Audit Call</h3>
+                                    <p className="text-[#B9B9C0] text-sm">30-minute video consultation</p>
+                                </div>
+                                <div className="text-right">
+                                    <div className="text-3xl font-bold text-[#6246EA]">$200</div>
+                                    <div className="text-xs text-[#B9B9C0] mt-1">Credits toward full review</div>
+                                </div>
                             </div>
-                            <div>
-                                <label className="block text-xs font-bold text-[#B9B9C0] mb-1">EMAIL FREQUENCY</label>
-                                <input type="email" name="email" required className="w-full p-3 rounded bg-[#0C0C0E] border border-[#24242A]" />
+                            <ul className="space-y-2 text-[#E9E9E9] mb-6">
+                                <li>• Quick contract scan on video call</li>
+                                <li>• Identify top 3-5 problem areas</li>
+                                <li>• "Should you sign this?" verdict</li>
+                                <li>• <span className="text-[#E9622D] font-bold">Full $200 credits toward Translation or Full Review</span></li>
+                            </ul>
+                            <button 
+                                data-tally-open="VLGZAy" 
+                                data-tally-layout="modal" 
+                                data-tally-width="1000"
+                                className="btn-secondary w-full py-3 rounded-lg"
+                            >
+                                BOOK AUDIT CALL
+                            </button>
+                        </div>
+
+                        {/* Tier 2: Translation */}
+                        <div className="bg-[#141418] border border-[#24242A] rounded-xl p-8 hover:border-[#6246EA] transition-colors">
+                            <div className="flex justify-between items-start mb-4">
+                                <div>
+                                    <h3 className="text-2xl font-bold text-white mb-2">Plain English Translation</h3>
+                                    <p className="text-[#B9B9C0] text-sm">Understanding what you're signing</p>
+                                </div>
+                                <div className="text-right">
+                                    <div className="text-3xl font-bold text-[#6246EA]">$2,100</div>
+                                </div>
                             </div>
+                            <ul className="space-y-2 text-[#E9E9E9] mb-6">
+                                <li>• Full contract rewritten in normal language</li>
+                                <li>• Section-by-section breakdown</li>
+                                <li>• "What this actually means" explanations</li>
+                                <li>• Delivered as annotated PDF</li>
+                            </ul>
+                            <button 
+                                data-tally-open="VLGZAy" 
+                                data-tally-layout="modal" 
+                                data-tally-width="1000"
+                                className="btn-secondary w-full py-3 rounded-lg"
+                            >
+                                REQUEST TRANSLATION
+                            </button>
                         </div>
 
-                        <div>
-                            <label className="block text-xs font-bold text-[#B9B9C0] mb-1">SYSTEM TYPE</label>
-                            <select name="package" className="w-full p-3 rounded bg-[#0C0C0E] border border-[#24242A] text-white">
-                                <option>Initiation ($500)</option>
-                                <option>Full System ($1,200)</option>
-                                <option>Custom Architecture</option>
-                                <option>Prompt Pack ($27)</option>
-                            </select>
+                        {/* Tier 3: Full Review */}
+                        <div className="bg-gradient-to-br from-[#E9622D]/10 to-[#6246EA]/10 border-2 border-[#E9622D] rounded-xl p-8 relative">
+                            <div className="absolute top-0 right-0 bg-[#E9622D] text-black text-xs font-bold px-3 py-1 rounded-bl-lg">
+                                MOST POPULAR
+                            </div>
+                            <div className="flex justify-between items-start mb-4 mt-4">
+                                <div>
+                                    <h3 className="text-2xl font-bold text-white mb-2">Full Contract Review</h3>
+                                    <p className="text-[#E9E9E9] text-sm">Translation + What To Watch Out For</p>
+                                </div>
+                                <div className="text-right">
+                                    <div className="text-3xl font-bold text-[#E9622D]">$5,200</div>
+                                </div>
+                            </div>
+                            <ul className="space-y-2 text-[#E9E9E9] mb-6">
+                                <li>• <span className="font-bold">Everything in Translation</span>, plus:</li>
+                                <li>• Red flags highlighted with context from my 15 years in finance</li>
+                                <li>• What to push back on and why</li>
+                                <li>• Alternative clause language options</li>
+                                <li>• "What I'd negotiate if this were mine"</li>
+                                <li>• 30-minute walkthrough call</li>
+                            </ul>
+                            <button 
+                                data-tally-open="VLGZAy" 
+                                data-tally-layout="modal" 
+                                data-tally-width="1000"
+                                className="btn-primary w-full py-3 rounded-lg"
+                            >
+                                REQUEST FULL REVIEW
+                            </button>
+                        </div>
+                    </div>
+                </section>
+
+                {/* CONTRACT TYPES */}
+                <section id="contract-types" className="mb-32 scroll-mt-24">
+                    <h2 className="text-3xl font-bold mb-12 text-center">
+                        Contracts I <span className="text-gradient">Review</span>
+                    </h2>
+                    <div className="grid md:grid-cols-3 gap-4 text-center">
+                        {[
+                            'Business Sale/Acquisition',
+                            'Employment Agreements',
+                            'Real Estate Contracts',
+                            'NDAs & Non-Competes',
+                            'Partnership Agreements',
+                            'Vendor/Supplier Contracts'
+                        ].map((type, i) => (
+                            <div key={i} className="p-6 bg-[#141418] border border-[#24242A] rounded-lg hover:border-[#6246EA] transition-colors">
+                                <p className="font-bold text-white">{type}</p>
+                            </div>
+                        ))}
+                    </div>
+                </section>
+
+                {/* CASE STUDY */}
+                <section id="case-study" className="mb-32 scroll-mt-24">
+                    <div className="bg-[#141418] border border-[#24242A] rounded-xl p-8 md:p-12">
+                        <span className="inline-block px-3 py-1 bg-[#E9622D]/20 border border-[#E9622D] rounded-full text-xs font-bold text-[#E9622D] tracking-widest mb-6">
+                            CASE STUDY
+                        </span>
+                        <h3 className="text-2xl md:text-3xl font-bold mb-6 text-white">
+                            The $650,000 Manufacturing Sale
+                        </h3>
+                        <div className="space-y-4 text-[#E9E9E9]">
+                            <p className="leading-relaxed">
+                                Client was selling their manufacturing business for $650K. Their attorney reviewed the purchase agreement and said it "looked standard."
+                            </p>
+                            <p className="leading-relaxed">
+                                I found a liability clause that would have made them personally responsible for equipment defects discovered within 5 years—even after the sale.
+                            </p>
+                            <p className="leading-relaxed text-[#E9622D] font-bold">
+                                Potential exposure: Unlimited. Equipment value: $2.3M.
+                            </p>
+                            <p className="leading-relaxed">
+                                We flagged it. They renegotiated. Cap set at $50K with a 12-month window.
+                            </p>
+                            <p className="leading-relaxed font-bold text-white">
+                                That's what I do.
+                            </p>
+                        </div>
+                    </div>
+                </section>
+
+                {/* HOW IT WORKS */}
+                <section id="how-it-works" className="mb-32 scroll-mt-24">
+                    <h2 className="text-3xl font-bold mb-12 text-center">
+                        How It <span className="text-gradient">Works</span>
+                    </h2>
+                    <div className="grid md:grid-cols-4 gap-6">
+                        {[
+                            { num: '01', title: 'Submit', desc: 'Fill out the form with your contract details' },
+                            { num: '02', title: 'Review', desc: 'I analyze every clause in detail' },
+                            { num: '03', title: 'Translate', desc: 'Get your annotated plain-English version' },
+                            { num: '04', title: 'Consult', desc: '30-min call to walk through findings' }
+                        ].map((step, i) => (
+                            <div key={i} className="text-center">
+                                <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-[#E9622D] to-[#6246EA] text-white font-bold text-xl mb-4">
+                                    {step.num}
+                                </div>
+                                <h3 className="text-xl font-bold text-white mb-2">{step.title}</h3>
+                                <p className="text-sm text-[#B9B9C0]">{step.desc}</p>
+                            </div>
+                        ))}
+                    </div>
+                </section>
+
+                {/* FAQ */}
+                <section id="faq" className="mb-32 scroll-mt-24">
+                    <h2 className="text-3xl font-bold mb-12 text-center">
+                        Common <span className="text-gradient">Questions</span>
+                    </h2>
+                    <div className="space-y-6 max-w-3xl mx-auto">
+                        <div className="bg-[#141418] border border-[#24242A] rounded-xl p-6">
+                            <h3 className="text-xl font-bold text-white mb-3">Do I need an attorney?</h3>
+                            <p className="text-[#E9E9E9] leading-relaxed">
+                                Yes. I work with clients who have legal representation. I'm not replacing your attorney—I'm the person who sits with you for hours explaining what everything means, which your attorney doesn't have time to do.
+                            </p>
                         </div>
 
-                        <div>
-                            <label className="block text-xs font-bold text-[#B9B9C0] mb-1">MISSION BRIEF (Optional)</label>
-                            <textarea name="message" rows="4" className="w-full p-3 rounded bg-[#0C0C0E] border border-[#24242A]"></textarea>
+                        <div className="bg-[#141418] border border-[#24242A] rounded-xl p-6">
+                            <h3 className="text-xl font-bold text-white mb-3">How long does it take?</h3>
+                            <p className="text-[#E9E9E9] leading-relaxed">
+                                Audit calls are scheduled within 48 hours. Full reviews typically take 5-7 business days depending on contract complexity.
+                            </p>
                         </div>
 
-                        <button type="submit" className="btn-primary w-full py-4 rounded font-bold tracking-widest text-lg mt-4">
-                            TRANSMIT REQUEST
+                        <div className="bg-[#141418] border border-[#24242A] rounded-xl p-6">
+                            <h3 className="text-xl font-bold text-white mb-3">What if I've already signed?</h3>
+                            <p className="text-[#E9E9E9] leading-relaxed">
+                                I can still review it to identify risks you should be aware of and help you understand your obligations going forward.
+                            </p>
+                        </div>
+                    </div>
+                </section>
+
+                {/* FINAL CTA */}
+                <section className="pb-32 text-center">
+                    <div className="bg-gradient-to-br from-[#E9622D]/10 to-[#6246EA]/10 border border-[#6246EA] rounded-2xl p-12">
+                        <h2 className="text-3xl md:text-4xl font-bold mb-6 text-white">
+                            Ready to understand what you're signing?
+                        </h2>
+                        <p className="text-lg text-[#E9E9E9] mb-8 max-w-xl mx-auto">
+                            Don't sign blindly. Get your contract reviewed by someone who's spent 15 years finding the traps.
+                        </p>
+                        <button 
+                            data-tally-open="VLGZAy" 
+                            data-tally-layout="modal" 
+                            data-tally-width="1000"
+                            className="btn-primary px-12 py-4 rounded-lg text-lg"
+                        >
+                            REQUEST REVIEW
                         </button>
-                    </form>
+                    </div>
+                </section>
+
+                {/* LEGAL DISCLAIMER */}
+                <section className="pb-16 text-center">
+                    <p className="text-xs text-[#B9B9C0] max-w-2xl mx-auto leading-relaxed">
+                        <span className="font-bold text-white">Legal Disclaimer:</span> Services are based on 15 years of financial industry experience identifying contractual risks. This is not legal advice. I work alongside your attorney, not as a replacement. Always consult a licensed attorney before making legal decisions.
+                    </p>
                 </section>
             </main>
         </div>
