@@ -129,18 +129,10 @@ const Home = () => {
             <style>{globalStyles}</style>
 
             {/* HEADER */}
-            <header className="max-w-4xl mx-auto px-6 py-6 flex justify-between items-center sticky top-0 z-50 bg-[#0C0C0E]/90 backdrop-blur-md border-b border-[#24242A]">
-                <div className="cursor-pointer hover:opacity-80 transition-opacity flex items-center" onClick={() => window.scrollTo(0, 0)}>
-                    {logo ? (
-                        <img src={logo} alt="VVVDigitals" className="h-56 w-auto" />
-                    ) : (
-                        <span className="text-2xl font-extrabold tracking-tighter uppercase text-gradient">VVVDIGITALS</span>
-                    )}
-                </div>
-
-                <div className="text-sm text-[#B9B9C0]">
-                    <span className="text-xs uppercase tracking-widest block mb-1 text-[#6246EA]">Consulting</span>
-                    <span className="italic">Translating Attorney Jargon Since 2010</span>
+            <header className="max-w-4xl mx-auto px-6 py-4 flex justify-center items-center sticky top-0 z-50 bg-[#0C0C0E]/90 backdrop-blur-md border-b border-[#24242A]">
+                <div className="text-center">
+                    <span className="text-xs uppercase tracking-widest block mb-1 text-[#6246EA] font-bold">VVVDigitals Consulting</span>
+                    <span className="text-sm text-[#B9B9C0] italic">Translating Attorney Jargon Since 2010</span>
                 </div>
             </header>
 
@@ -500,6 +492,59 @@ const Home = () => {
                     </p>
                 </section>
             </main>
+
+            {/* FOOTER */}
+            <footer className="border-t border-[#24242A] bg-[#0C0C0E]">
+                <div className="max-w-4xl mx-auto px-6 py-12">
+                    <div className="flex flex-col items-center gap-8 mb-8">
+                        {/* Logo */}
+                        <div className="flex items-center justify-center">
+                            {logo ? (
+                                <img src={logo} alt="VVVDigitals" className="h-32 w-auto opacity-90" />
+                            ) : (
+                                <span className="text-3xl font-extrabold tracking-tighter uppercase text-gradient">VVVDIGITALS</span>
+                            )}
+                        </div>
+                        
+                        {/* Company Info */}
+                        <div className="text-center">
+                            <p className="text-[#E9E9E9] font-bold mb-2">VVVDigitals Consulting</p>
+                            <p className="text-[#B9B9C0] text-sm mb-4">Contract Review & Translation Services</p>
+                            <a 
+                                href="mailto:britnic@vvvdigitals.com" 
+                                className="text-[#6246EA] hover:text-[#E9622D] transition-colors font-bold"
+                            >
+                                britnic@vvvdigitals.com
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <div className="flex flex-col md:flex-row justify-between items-center gap-4 pt-8 border-t border-[#24242A]">
+                        <div className="flex gap-6 text-sm">
+                            <a 
+                                href="/docs/privacy-policy.html" 
+                                target="_blank" 
+                                rel="noopener noreferrer"
+                                className="text-[#B9B9C0] hover:text-[#E9622D] transition-colors"
+                            >
+                                Privacy Policy
+                            </a>
+                            <a 
+                                href="/docs/terms-of-service.html" 
+                                target="_blank" 
+                                rel="noopener noreferrer"
+                                className="text-[#B9B9C0] hover:text-[#E9622D] transition-colors"
+                            >
+                                Terms of Service
+                            </a>
+                        </div>
+                        
+                        <p className="text-[#B9B9C0] text-sm">
+                            © {new Date().getFullYear()} VVVDigitals LLC. All rights reserved.
+                        </p>
+                    </div>
+                </div>
+            </footer>
         </div>
     );
 };
