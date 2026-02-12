@@ -177,7 +177,7 @@ const ContactForm = () => {
       </div>
       <div><label style={lbl}>Message</label><textarea required value={f.message} onChange={e => u('message', e.target.value)} placeholder="Tell me about your practice and what you need help with..." rows={5} style={{ ...inp, resize: 'vertical', minHeight: 120 }} onFocus={e => e.target.style.borderColor = A} onBlur={e => e.target.style.borderColor = '#222'} /></div>
       <button type="submit" disabled={st === 'sending'} style={{ padding: '16px 48px', background: A, color: '#fff', fontSize: 12, fontWeight: 700, letterSpacing: '0.15em', textTransform: 'uppercase', border: 'none', cursor: st === 'sending' ? 'wait' : 'pointer', transition: 'all 0.25s', borderRadius: 2, opacity: st === 'sending' ? 0.7 : 1, alignSelf: 'flex-start' }} onMouseEnter={e => { if (st !== 'sending') e.target.style.background = AL; }} onMouseLeave={e => e.target.style.background = A}>{st === 'sending' ? 'Sending...' : 'Send Message'}</button>
-      {st === 'error' && <p style={{ fontSize: 13, color: '#ef4444' }}>Something went wrong. Try emailing britnic@vvvdigitals.com directly.</p>}
+      {st === 'error' && <p style={{ fontSize: 13, color: '#ef4444' }}>Something went wrong. Try emailing admin@vvvdigitals.com directly.</p>}
     </form>
   );
 };
@@ -361,7 +361,7 @@ const Home = () => {
           </div>
           <div style={{ padding: '40px 36px', background: BGC, border: `1px solid ${BDR}` }}><ContactForm /></div>
           <div style={{ textAlign: 'center', marginTop: 20 }}>
-            <p style={{ fontSize: 12, color: '#444', fontFamily: "'DM Mono', monospace" }}>Or email directly: <a href="mailto:britnic@vvvdigitals.com" style={{ color: A, textDecoration: 'none' }}>britnic@vvvdigitals.com</a></p>
+            <p style={{ fontSize: 12, color: '#444', fontFamily: "'DM Mono', monospace" }}>Or email directly: <a href="mailto:admin@vvvdigitals.com" style={{ color: A, textDecoration: 'none' }}>admin@vvvdigitals.com</a></p>
           </div>
         </div></div>
       </section>
@@ -374,7 +374,7 @@ const Home = () => {
             <div style={{ display: 'flex', gap: 24, alignItems: 'center', flexWrap: 'wrap' }}>
               <a href="/docs/privacy-policy.html" target="_blank" rel="noopener noreferrer" style={{ fontSize: 11, color: '#444', textDecoration: 'none', fontFamily: "'DM Mono', monospace" }}>Privacy</a>
               <a href="/docs/terms-of-service.html" target="_blank" rel="noopener noreferrer" style={{ fontSize: 11, color: '#444', textDecoration: 'none', fontFamily: "'DM Mono', monospace" }}>Terms</a>
-              <a href="mailto:britnic@vvvdigitals.com" style={{ fontSize: 11, color: A, textDecoration: 'none', fontFamily: "'DM Mono', monospace" }}>britnic@vvvdigitals.com</a>
+              <a href="mailto:admin@vvvdigitals.com" style={{ fontSize: 11, color: A, textDecoration: 'none', fontFamily: "'DM Mono', monospace" }}>admin@vvvdigitals.com</a>
             </div>
           </div>
           <div style={{ marginTop: 32, paddingTop: 24, borderTop: `1px solid ${BDR}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
