@@ -13,18 +13,18 @@ const BDR = '#1c1c1c';
 const GRADER_QS = [
   { id: 1, q: "How do new clients first contact your firm?", opts: [
     { t: "They call and whoever answers takes notes on paper", s: 1 },
-    { t: "They email or call \u2014 I manually enter info into a spreadsheet", s: 2 },
+    { t: "They email or call — I manually enter info into a spreadsheet", s: 2 },
     { t: "They fill out a basic form on my website", s: 3 },
     { t: "Automated online form that routes to my case management system", s: 4 },
   ]},
   { id: 2, q: "How quickly do new leads get a response?", opts: [
-    { t: "When I get around to it \u2014 sometimes days", s: 1 },
+    { t: "When I get around to it — sometimes days", s: 1 },
     { t: "Within 24 hours, usually", s: 2 },
-    { t: "Same business day \u2014 I try to prioritize it", s: 3 },
+    { t: "Same business day — I try to prioritize it", s: 3 },
     { t: "Automated acknowledgment within minutes, follow-up within hours", s: 4 },
   ]},
   { id: 3, q: "What happens with client documents during intake?", opts: [
-    { t: "They bring physical copies \u2014 I keep a paper folder", s: 1 },
+    { t: "They bring physical copies — I keep a paper folder", s: 1 },
     { t: "They email docs and I save them in folders on my computer", s: 2 },
     { t: "They upload to a shared drive or portal", s: 3 },
     { t: "Secure client portal with automated document requests and tracking", s: 4 },
@@ -39,7 +39,7 @@ const GRADER_QS = [
     { t: "I explain fees verbally and sometimes follow up with a letter", s: 1 },
     { t: "I have a standard template I edit and email for signature", s: 2 },
     { t: "Clients sign digitally via DocuSign or similar", s: 3 },
-    { t: "Auto-generated from intake data, e-signed, and filed \u2014 no manual steps", s: 4 },
+    { t: "Auto-generated from intake data, e-signed, and filed — no manual steps", s: 4 },
   ]},
   { id: 6, q: "How do you track where each new matter stands in the intake pipeline?", opts: [
     { t: "I keep it in my head", s: 1 },
@@ -51,10 +51,10 @@ const GRADER_QS = [
 
 function getGrade(score) {
   const pct = (score / 24) * 100;
-  if (pct >= 85) return { l: 'A', lb: 'Excellent', c: '#22c55e', s: "Your intake system is well-built. You're ahead of 90% of solo practitioners. Minor optimizations could still save you hours per month.", r: ["Consider adding automated follow-up sequences for leads that don't convert immediately.", "Audit your process quarterly \u2014 even good systems drift.", "Look into client satisfaction surveys post-intake to catch friction points."] };
-  if (pct >= 70) return { l: 'B', lb: 'Solid', c: '#84cc16', s: "You've got the bones of a good system, but there are gaps costing you time and probably clients. The leads that slip through those gaps? They're hiring your competitors.", r: ["Automate your initial response \u2014 every hour of delay drops conversion rates by 10%.", "Move document collection to a secure portal. Email attachments are a liability risk.", "Build a conflict check into your intake form so it happens before you invest time in a consultation."] };
-  if (pct >= 50) return { l: 'C', lb: 'Needs Work', c: '#eab308', s: "You're running on manual effort and it's costing you. Every hour you spend on admin intake tasks is an hour you're not billing.", r: ["Priority one: automate your first response.", "Get your fee agreements into a digital signature workflow \u2014 this alone saves 2-3 hours per week.", "Track your pipeline somewhere other than your head.", "Consider a full intake system audit to identify exactly where your process breaks down."] };
-  if (pct >= 30) return { l: 'D', lb: 'At Risk', c: '#f97316', s: "Your intake process has serious gaps that are actively costing you revenue and creating compliance risk.", r: ["You need a structured intake workflow \u2014 not a better to-do list, an actual system.", "Document collection via email is a malpractice risk. Move to a secure portal immediately.", "Your response time is likely your biggest revenue leak.", "A full operational audit would identify exactly how much revenue you're leaving on the table.", "This is fixable \u2014 the ones who fix it see 20-40% more conversions."] };
+  if (pct >= 85) return { l: 'A', lb: 'Excellent', c: '#22c55e', s: "Your intake system is well-built. You're ahead of 90% of solo practitioners. Minor optimizations could still save you hours per month.", r: ["Consider adding automated follow-up sequences for leads that don't convert immediately.", "Audit your process quarterly — even good systems drift.", "Look into client satisfaction surveys post-intake to catch friction points."] };
+  if (pct >= 70) return { l: 'B', lb: 'Solid', c: '#84cc16', s: "You've got the bones of a good system, but there are gaps costing you time and probably clients. The leads that slip through those gaps? They're hiring your competitors.", r: ["Automate your initial response — every hour of delay drops conversion rates by 10%.", "Move document collection to a secure portal. Email attachments are a liability risk.", "Build a conflict check into your intake form so it happens before you invest time in a consultation."] };
+  if (pct >= 50) return { l: 'C', lb: 'Needs Work', c: '#eab308', s: "You're running on manual effort and it's costing you. Every hour you spend on admin intake tasks is an hour you're not billing.", r: ["Priority one: automate your first response.", "Get your fee agreements into a digital signature workflow — this alone saves 2-3 hours per week.", "Track your pipeline somewhere other than your head.", "Consider a full intake system audit to identify exactly where your process breaks down."] };
+  if (pct >= 30) return { l: 'D', lb: 'At Risk', c: '#f97316', s: "Your intake process has serious gaps that are actively costing you revenue and creating compliance risk.", r: ["You need a structured intake workflow — not a better to-do list, an actual system.", "Document collection via email is a malpractice risk. Move to a secure portal immediately.", "Your response time is likely your biggest revenue leak.", "A full operational audit would identify exactly how much revenue you're leaving on the table.", "This is fixable — the ones who fix it see 20-40% more conversions."] };
   return { l: 'F', lb: 'Critical', c: '#ef4444', s: "Your intake process needs immediate attention. You're almost certainly losing more clients than you're signing.", r: ["Stop everything and build a basic intake form. Even a Google Form is better than what you have now.", "Set up an auto-responder today. It takes 15 minutes and it's the single highest-ROI change you can make.", "You need professional help rebuilding this from the ground up. A proper intake system pays for itself within 60 days.", "Every week you operate like this costs you 3-5 potential clients."] };
 }
 
@@ -150,7 +150,7 @@ const ContactForm = () => {
   if (st === 'sent') return (
     <div style={{ textAlign: 'center', padding: '48px 32px' }}>
       <div style={{ width: 56, height: 56, borderRadius: '50%', background: `${A}22`, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', marginBottom: 20 }}>
-        <span style={{ color: A, fontSize: 28 }}>{'\u2713'}</span>
+        <span style={{ color: A, fontSize: 28 }}>{'✓'}</span>
       </div>
       <h3 style={{ fontSize: 22, fontWeight: 700, color: TXT, marginBottom: 8, fontFamily: "'Playfair Display', serif" }}>Message received.</h3>
       <p style={{ fontSize: 15, color: MID, lineHeight: 1.6 }}>I will be in touch within one business day.</p>
@@ -209,14 +209,14 @@ const Home = () => {
       `}</style>
 
       {/* HEADER */}
-      <header style={{ position: 'sticky', top: 0, zIndex: 100, background: scrolled ? 'rgba(10,10,10,0.92)' : 'transparent', backdropFilter: scrolled ? 'blur(12px)' : 'none', borderBottom: scrolled ? `1px solid ${BDR}` : '1px solid transparent', transition: 'all 0.3s' }}>
-        <div style={{ ...sx, display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px 24px' }}>
-          <a href="#"><img src={logo} alt="VVV Digitals" style={{ height: 40 }} /></a>
+      <header style={{ position: 'sticky', top: 0, zIndex: 100, background: scrolled ? 'rgba(10,10,10,0.92)' : 'transparent', backdropFilter: scrolled ? 'blur(12px)' : 'none', borderBottom: scrolled ? `1px solid ${BDR}` : '1px solid transparent', transition: 'all 0.3s', overflow: 'visible' }}>
+        <div style={{ ...sx, display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 24px' }}>
+          <a href="#"><img src={logo} alt="VVV Digitals" style={{ height: 72, display: 'block' }} /></a>
           <nav className="desktop-nav" style={{ display: 'flex', gap: 32, alignItems: 'center' }}>
             {['Services','Tools','Products','About'].map(i => <a key={i} href={`#${i.toLowerCase()}`} style={{ color: MID, fontSize: 12, fontWeight: 600, letterSpacing: '0.12em', textTransform: 'uppercase', textDecoration: 'none', transition: 'color 0.2s', fontFamily: "'DM Mono', monospace" }} onMouseEnter={e => e.target.style.color = TXT} onMouseLeave={e => e.target.style.color = MID}>{i}</a>)}
             <a href="#contact" style={{ padding: '10px 24px', background: A, color: '#fff', fontSize: 11, fontWeight: 700, letterSpacing: '0.15em', textTransform: 'uppercase', textDecoration: 'none', borderRadius: 2, fontFamily: "'DM Mono', monospace", transition: 'background 0.25s' }} onMouseEnter={e => e.target.style.background = AL} onMouseLeave={e => e.target.style.background = A}>Contact</a>
           </nav>
-          <button className="mobile-toggle" onClick={() => setMobileNav(!mobileNav)} style={{ background: 'none', border: 'none', color: MID, fontSize: 24, cursor: 'pointer', padding: 8 }}>{mobileNav ? '\u2715' : '\u2630'}</button>
+          <button className="mobile-toggle" onClick={() => setMobileNav(!mobileNav)} style={{ background: 'none', border: 'none', color: MID, fontSize: 24, cursor: 'pointer', padding: 8 }}>{mobileNav ? '✕' : '☰'}</button>
         </div>
         {mobileNav && <div className="mobile-menu" style={{ padding: '16px 24px', borderTop: `1px solid ${BDR}`, display: 'flex', flexDirection: 'column', gap: 16, background: 'rgba(10,10,10,0.97)' }}>
           {['Services','Tools','Products','About'].map(i => <a key={i} href={`#${i.toLowerCase()}`} onClick={() => setMobileNav(false)} style={{ color: '#bbb', fontSize: 14, fontWeight: 600, textDecoration: 'none', fontFamily: "'DM Mono', monospace" }}>{i}</a>)}
@@ -229,7 +229,7 @@ const Home = () => {
         <div style={{ ...sx, textAlign: 'center' }}>
           <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.3em', textTransform: 'uppercase', color: A, marginBottom: 32, fontFamily: "'DM Mono', monospace", animation: 'fadeIn 1s' }}>Operational Consulting for Legal Professionals</div>
           <h1 style={{ fontSize: 'clamp(36px, 6vw, 72px)', fontWeight: 700, lineHeight: 1.1, marginBottom: 28, color: TXT, fontFamily: "'Playfair Display', serif", animation: 'fadeUp 0.8s' }}>Your practice runs on systems.<br /><span style={{ color: A, fontStyle: 'italic' }}>Most of them are broken.</span></h1>
-          <p style={{ fontSize: 18, lineHeight: 1.7, color: MID, maxWidth: 580, margin: '0 auto 48px', animation: 'fadeUp 0.8s 0.15s both' }}>15 years in banking, insurance, and risk assessment \u2014 now applied to the firms that need it most. I fix the operational chaos that keeps solo attorneys buried in admin instead of practicing law.</p>
+          <p style={{ fontSize: 18, lineHeight: 1.7, color: MID, maxWidth: 580, margin: '0 auto 48px', animation: 'fadeUp 0.8s 0.15s both' }}>15 years in banking, insurance, and risk assessment — now applied to the firms that need it most. I fix the operational chaos that keeps solo attorneys buried in admin instead of practicing law.</p>
           <div style={{ display: 'flex', gap: 16, justifyContent: 'center', flexWrap: 'wrap', animation: 'fadeUp 0.8s 0.3s both' }}>
             <a href="#tools" style={{ padding: '16px 40px', background: TXT, color: '#111', fontSize: 12, fontWeight: 700, letterSpacing: '0.15em', textTransform: 'uppercase', textDecoration: 'none', borderRadius: 2, transition: 'all 0.25s' }} onMouseEnter={e => { e.target.style.background = A; e.target.style.color = '#fff'; }} onMouseLeave={e => { e.target.style.background = TXT; e.target.style.color = '#111'; }}>Grade Your Intake System</a>
             <a href="#services" style={{ padding: '16px 40px', background: 'transparent', border: `1px solid ${MID}`, color: '#bbb', fontSize: 12, fontWeight: 700, letterSpacing: '0.15em', textTransform: 'uppercase', textDecoration: 'none', borderRadius: 2, transition: 'all 0.25s' }} onMouseEnter={e => { e.target.style.borderColor = TXT; e.target.style.color = TXT; }} onMouseLeave={e => { e.target.style.borderColor = MID; e.target.style.color = '#bbb'; }}>View Services</a>
@@ -251,7 +251,7 @@ const Home = () => {
           <h2 style={{ fontSize: 32, fontWeight: 700, lineHeight: 1.35, color: TXT, marginBottom: 24, fontFamily: "'Playfair Display', serif" }}>You went to law school to practice law. Not to troubleshoot your CRM at 11pm.</h2>
           <p style={{ fontSize: 16, lineHeight: 1.8, color: MID, marginBottom: 20 }}>Solo practitioners lose an average of 10-15 hours per week on operational tasks that should be automated. That is $15,000-$30,000 in unbilled time every month.</p>
           <p style={{ fontSize: 16, lineHeight: 1.8, color: MID, marginBottom: 20 }}>Your intake process leaks clients. Your document management creates liability. Your billing workflow costs you money you do not even know you are losing.</p>
-          <p style={{ fontSize: 17, lineHeight: 1.8, color: TXT, fontWeight: 600 }}>I have spent 15 years finding exactly these kinds of operational failures in banking and insurance. Now I find them in your practice \u2014 and I fix them.</p>
+          <p style={{ fontSize: 17, lineHeight: 1.8, color: TXT, fontWeight: 600 }}>I have spent 15 years finding exactly these kinds of operational failures in banking and insurance. Now I find them in your practice — and I fix them.</p>
         </div></div>
       </section>
 
@@ -264,12 +264,12 @@ const Home = () => {
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 24 }}>
             {[
-              { tag: 'OPERATIONS', title: 'Workflow Optimization', desc: 'Full audit and rebuild of your practice operations \u2014 client intake, document management, billing, and case tracking.', price: 'From $2,500' },
+              { tag: 'OPERATIONS', title: 'Workflow Optimization', desc: 'Full audit and rebuild of your practice operations — client intake, document management, billing, and case tracking.', price: 'From $2,500' },
               { tag: 'SYSTEMS', title: 'Intake System Design', desc: 'Custom-built client intake workflows that automate first contact through signed engagement. Reduce intake admin by 40-60%.', price: 'From $3,500' },
               { tag: 'CONTRACTS', title: 'Contract Review', desc: 'Plain-English translation and risk analysis of business contracts. 15 years finding where money disappears in fine print.', price: 'From $200' },
               { tag: 'COMPLIANCE', title: 'Risk & Compliance Audit', desc: 'Operational risk assessment for your practice. Compliance gaps, document vulnerabilities, and process failures identified.', price: 'From $1,500' },
               { tag: 'TECHNOLOGY', title: 'Tech Stack Setup', desc: 'I select, configure, and integrate the right practice management tools for your firm.', price: 'From $2,000' },
-              { tag: 'ONGOING', title: 'Monthly Retainer', desc: 'Ongoing operational support. I keep your systems running and continuously improve workflows as your practice grows.', price: '$500\u20131,500/mo' },
+              { tag: 'ONGOING', title: 'Monthly Retainer', desc: 'Ongoing operational support. I keep your systems running and continuously improve workflows as your practice grows.', price: '$500–1,500/mo' },
             ].map((s, i) => (
               <div key={i} style={{ padding: '36px 32px', background: BGC, border: `1px solid ${BDR}`, transition: 'border-color 0.3s', cursor: 'default' }} onMouseEnter={e => e.currentTarget.style.borderColor = '#2a2a2a'} onMouseLeave={e => e.currentTarget.style.borderColor = BDR}>
                 <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.25em', color: A, marginBottom: 16, fontFamily: "'DM Mono', monospace" }}>{s.tag}</div>
@@ -340,7 +340,7 @@ const Home = () => {
               <p style={{ fontSize: 15, lineHeight: 1.8, color: TXT, fontWeight: 500 }}>I do not just consult. I build the systems, implement the tools, and make sure they work before I leave.</p>
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-              {[{ n: '15+', l: 'Years in Financial Services' }, { n: '40\u201360%', l: 'Avg. Admin Time Reduction' }, { n: '30', l: 'Days to See Results' }, { n: '3', l: 'Revenue Streams, One Firm' }].map((s, i) => (
+              {[{ n: '15+', l: 'Years in Financial Services' }, { n: '40–60%', l: 'Avg. Admin Time Reduction' }, { n: '30', l: 'Days to See Results' }, { n: '3', l: 'Revenue Streams, One Firm' }].map((s, i) => (
                 <div key={i} style={{ padding: '24px 28px', background: BGC, border: `1px solid ${BDR}`, display: 'flex', alignItems: 'center', gap: 20 }}>
                   <span style={{ fontSize: 28, fontWeight: 800, color: A, fontFamily: "'Playfair Display', serif", minWidth: 80 }}>{s.n}</span>
                   <span style={{ fontSize: 14, color: MID }}>{s.l}</span>
@@ -357,7 +357,7 @@ const Home = () => {
           <div style={{ textAlign: 'center', marginBottom: 48 }}>
             <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.3em', color: A, marginBottom: 16, fontFamily: "'DM Mono', monospace" }}>GET IN TOUCH</div>
             <h2 style={{ fontSize: 36, fontWeight: 700, color: TXT, marginBottom: 12, fontFamily: "'Playfair Display', serif" }}>Start a Conversation</h2>
-            <p style={{ fontSize: 15, color: MID, lineHeight: 1.7 }}>No pitch, no pressure \u2014 just an honest assessment of what is working and what is not.</p>
+            <p style={{ fontSize: 15, color: MID, lineHeight: 1.7 }}>No pitch, no pressure — just an honest assessment of what is working and what is not.</p>
           </div>
           <div style={{ padding: '40px 36px', background: BGC, border: `1px solid ${BDR}` }}><ContactForm /></div>
           <div style={{ textAlign: 'center', marginTop: 20 }}>
@@ -370,7 +370,7 @@ const Home = () => {
       <footer style={{ borderTop: `1px solid ${BDR}`, padding: '48px 0', background: BG }}>
         <div style={sx}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 24 }}>
-            <div><img src={logo} alt="VVV Digitals" style={{ height: 32, marginBottom: 8, opacity: 0.7 }} /><p style={{ fontSize: 12, color: '#444', fontFamily: "'DM Mono', monospace" }}>Operational Consulting & Digital Solutions</p></div>
+            <div><img src={logo} alt="VVV Digitals" style={{ height: 56, marginBottom: 8 }} /><p style={{ fontSize: 12, color: '#444', fontFamily: "'DM Mono', monospace" }}>Operational Consulting & Digital Solutions</p></div>
             <div style={{ display: 'flex', gap: 24, alignItems: 'center', flexWrap: 'wrap' }}>
               <a href="/docs/privacy-policy.html" target="_blank" rel="noopener noreferrer" style={{ fontSize: 11, color: '#444', textDecoration: 'none', fontFamily: "'DM Mono', monospace" }}>Privacy</a>
               <a href="/docs/terms-of-service.html" target="_blank" rel="noopener noreferrer" style={{ fontSize: 11, color: '#444', textDecoration: 'none', fontFamily: "'DM Mono', monospace" }}>Terms</a>
@@ -378,7 +378,7 @@ const Home = () => {
             </div>
           </div>
           <div style={{ marginTop: 32, paddingTop: 24, borderTop: `1px solid ${BDR}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
-            <p style={{ fontSize: 11, color: '#333', fontFamily: "'DM Mono', monospace" }}>{'\u00A9'} {new Date().getFullYear()} VVV Digitals LLC. All rights reserved.</p>
+            <p style={{ fontSize: 11, color: '#333', fontFamily: "'DM Mono', monospace" }}>{'©'} {new Date().getFullYear()} VVV Digitals LLC. All rights reserved.</p>
             <p style={{ fontSize: 11, color: '#333', fontFamily: "'DM Mono', monospace" }}>Glendale, Arizona</p>
           </div>
         </div>
