@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import logoNew from '../assets/logo-new.png';
+const logo = '/logo.png';
 
 const A = '#5366F3';
 const AL = '#7B8AF7';
@@ -211,7 +211,7 @@ const Home = () => {
       {/* HEADER */}
       <header style={{ position: 'sticky', top: 0, zIndex: 100, background: scrolled ? 'rgba(10,10,10,0.92)' : 'transparent', backdropFilter: scrolled ? 'blur(12px)' : 'none', borderBottom: scrolled ? `1px solid ${BDR}` : '1px solid transparent', transition: 'all 0.3s' }}>
         <div style={{ ...sx, display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px 24px' }}>
-          <a href="#"><img src={logoNew} alt="VVV Digitals" style={{ height: 40 }} /></a>
+          <a href="#"><img src={logo} alt="VVV Digitals" style={{ height: 40 }} /></a>
           <nav className="desktop-nav" style={{ display: 'flex', gap: 32, alignItems: 'center' }}>
             {['Services','Tools','Products','About'].map(i => <a key={i} href={`#${i.toLowerCase()}`} style={{ color: MID, fontSize: 12, fontWeight: 600, letterSpacing: '0.12em', textTransform: 'uppercase', textDecoration: 'none', transition: 'color 0.2s', fontFamily: "'DM Mono', monospace" }} onMouseEnter={e => e.target.style.color = TXT} onMouseLeave={e => e.target.style.color = MID}>{i}</a>)}
             <a href="#contact" style={{ padding: '10px 24px', background: A, color: '#fff', fontSize: 11, fontWeight: 700, letterSpacing: '0.15em', textTransform: 'uppercase', textDecoration: 'none', borderRadius: 2, fontFamily: "'DM Mono', monospace", transition: 'background 0.25s' }} onMouseEnter={e => e.target.style.background = AL} onMouseLeave={e => e.target.style.background = A}>Contact</a>
@@ -370,7 +370,7 @@ const Home = () => {
       <footer style={{ borderTop: `1px solid ${BDR}`, padding: '48px 0', background: BG }}>
         <div style={sx}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 24 }}>
-            <div><img src={logoNew} alt="VVV Digitals" style={{ height: 32, marginBottom: 8, opacity: 0.7 }} /><p style={{ fontSize: 12, color: '#444', fontFamily: "'DM Mono', monospace" }}>Operational Consulting & Digital Solutions</p></div>
+            <div><img src={logo} alt="VVV Digitals" style={{ height: 32, marginBottom: 8, opacity: 0.7 }} /><p style={{ fontSize: 12, color: '#444', fontFamily: "'DM Mono', monospace" }}>Operational Consulting & Digital Solutions</p></div>
             <div style={{ display: 'flex', gap: 24, alignItems: 'center', flexWrap: 'wrap' }}>
               <a href="/docs/privacy-policy.html" target="_blank" rel="noopener noreferrer" style={{ fontSize: 11, color: '#444', textDecoration: 'none', fontFamily: "'DM Mono', monospace" }}>Privacy</a>
               <a href="/docs/terms-of-service.html" target="_blank" rel="noopener noreferrer" style={{ fontSize: 11, color: '#444', textDecoration: 'none', fontFamily: "'DM Mono', monospace" }}>Terms</a>
