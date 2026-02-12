@@ -130,6 +130,27 @@ const IntakeGrader = () => {
   );
 };
 
+const PayPalButton = () => {
+  const containerRef = useRef(null);
+  const rendered = useRef(false);
+
+  useEffect(() => {
+    if (rendered.current) return;
+    const interval = setInterval(() => {
+      if (window.paypal && window.paypal.HostedButtons && containerRef.current) {
+        clearInterval(interval);
+        rendered.current = true;
+        window.paypal.HostedButtons({
+          hostedButtonId: "XPWQ88B2QH35W"
+        }).render(containerRef.current);
+      }
+    }, 200);
+    return () => clearInterval(interval);
+  }, []);
+
+  return <div ref={containerRef} style={{ minHeight: 52 }} />;
+};
+
 const ContactForm = () => {
   const [f, setF] = useState({ name: '', email: '', practice: '', pain: '', message: '' });
   const [st, setSt] = useState('idle');
@@ -364,6 +385,18 @@ const Home = () => {
             <p style={{ fontSize: 12, color: '#444', fontFamily: "'DM Mono', monospace" }}>Or email directly: <a href="mailto:admin@vvvdigitals.com" style={{ color: A, textDecoration: 'none' }}>admin@vvvdigitals.com</a></p>
           </div>
         </div></div>
+      </section>
+
+      {/* PAY ME */}
+      <section id="pay" style={{ padding: '80px 0', borderTop: `1px solid ${BDR}` }}>
+        <div style={{ ...sx, maxWidth: 480, textAlign: 'center' }}>
+          <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.3em', color: A, marginBottom: 16, fontFamily: "'DM Mono', monospace" }}>PAYMENT</div>
+          <h2 style={{ fontSize: 28, fontWeight: 700, color: TXT, marginBottom: 12, fontFamily: "'Playfair Display', serif" }}>Send a Payment</h2>
+          <p style={{ fontSize: 14, color: MID, lineHeight: 1.7, marginBottom: 32 }}>Ready to get started? Use the button below to submit a payment securely via PayPal or Venmo.</p>
+          <div style={{ padding: '32px', background: BGC, border: `1px solid ${BDR}`, borderRadius: 4 }}>
+            <PayPalButton />
+          </div>
+        </div>
       </section>
 
       {/* FOOTER */}
