@@ -2,8 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-body {
-  background-color: #0C0C0E;
-  margin: 0;
-  font-family: 'Inter', sans-serif;
-}
+*, *::before, *::after { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body { margin: 0; background: #080d14; }

@@ -7,18 +7,22 @@ export default {
   theme: {
     extend: {
       colors: {
-        'vvv-purple': '#6246EA',
-        'vvv-coral': '#E9622D',
-        'vvv-charcoal': '#0C0C0E',
-        'vvv-surface': '#141418',
-        'vvv-text': '#E9E9E9',
-        'vvv-muted': '#B9B9C0',
-        'vvv-divider': '#24242A',
+        bg:           '#080d14',
+        'bg-2':       '#0c1220',
+        'bg-card':    '#0f1520',
+        border:       '#1a2332',
+        accent:       '#3B6EF8',
+        'accent-dim': '#1e3a6e',
+        txt:          '#E8EDF5',
+        mid:          '#4a5568',
+        muted:        '#2d3a4a',
       },
       fontFamily: {
-        sans: ['Inter', 'sans-serif'],
-      }
+        sans:     ["'DM Sans'",    'sans-serif'],
+        mono:     ["'DM Mono'",    'monospace'],
+        headline: ["'Bebas Neue'", 'cursive'],
+      },
     },
   },
   plugins: [],
-}
+};
