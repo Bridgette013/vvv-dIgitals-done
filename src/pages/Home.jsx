@@ -3,24 +3,6 @@ import { Link } from 'react-router-dom';
 import { motion, useInView } from 'framer-motion';
 import Nav from '../components/Nav';
 
-// ─── Blinking Avatar ──────────────────────────────────────────────────────────
-const BlinkingAvatar = () => (
-  <div style={{ width: '100%', maxWidth: 400, margin: '0 auto' }}>
-    <iframe
-      src="/avatar.html"
-      scrolling="no"
-      title="Brit — Founder, VVV Digitals"
-      style={{
-        width: '100%',
-        height: 640,
-        border: 'none',
-        display: 'block',
-        overflow: 'hidden',
-      }}
-    />
-  </div>
-);
-
 // ─── Tokens ───────────────────────────────────────────────────────────────────
 const BG   = '#080d14';
 const BG2  = '#0c1220';
@@ -611,9 +593,7 @@ const Home = () => {
               </p>
             </FadeUp>
             <FadeUp delay={0.12}>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
-                <BlinkingAvatar />
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 2, background: BDR, border: `1px solid ${BDR}` }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 2, background: BDR, border: `1px solid ${BDR}` }}>
                   {[
                     { label: 'Years of Experience', value: '15+' },
                     { label: 'Background', value: 'Banking · Insurance · Risk' },
@@ -628,7 +608,6 @@ const Home = () => {
                     </div>
                   ))}
                 </div>
-              </div>
             </FadeUp>
           </div>
         </div>
