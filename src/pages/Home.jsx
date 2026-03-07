@@ -3,6 +3,24 @@ import { Link } from 'react-router-dom';
 import { motion, useInView } from 'framer-motion';
 import Nav from '../components/Nav';
 
+// ─── Blinking Avatar ──────────────────────────────────────────────────────────
+const BlinkingAvatar = () => (
+  <div style={{ width: '100%', maxWidth: 400, margin: '0 auto' }}>
+    <iframe
+      src="/avatar.html"
+      scrolling="no"
+      title="Brit — Founder, VVV Digitals"
+      style={{
+        width: '100%',
+        height: 640,
+        border: 'none',
+        display: 'block',
+        overflow: 'hidden',
+      }}
+    />
+  </div>
+);
+
 // ─── Tokens ───────────────────────────────────────────────────────────────────
 const BG   = '#080d14';
 const BG2  = '#0c1220';
@@ -46,14 +64,14 @@ const Divider = () => (
   <div style={{ width: '100%', height: 1, background: BDR }} />
 );
 
-// ─── Intake Grader ────────────────────────────────────────────────────────────
+// ─── Operations Grader ────────────────────────────────────────────────────────
 const GRADER_QS = [
-  { id: 1, q: "How do new clients first contact your firm?",
+  { id: 1, q: "How do new leads first reach your business?",
     opts: [
-      { t: "They call and whoever answers takes notes on paper", s: 1 },
+      { t: "They call or DM — whoever answers takes notes however they can", s: 1 },
       { t: "They email or call — I manually enter info into a spreadsheet", s: 2 },
       { t: "They fill out a basic form on my website", s: 3 },
-      { t: "Automated online form that routes to my case management system", s: 4 },
+      { t: "Automated intake form that routes directly into my CRM", s: 4 },
     ]},
   { id: 2, q: "How quickly do new leads get a response?",
     opts: [
@@ -62,43 +80,43 @@ const GRADER_QS = [
       { t: "Same business day — I try to prioritize it", s: 3 },
       { t: "Automated acknowledgment within minutes, follow-up within hours", s: 4 },
     ]},
-  { id: 3, q: "What happens with client documents during intake?",
+  { id: 3, q: "How are your core business processes documented?",
     opts: [
-      { t: "They bring physical copies — I keep a paper folder", s: 1 },
-      { t: "They email docs and I save them in folders on my computer", s: 2 },
-      { t: "They upload to a shared drive or portal", s: 3 },
-      { t: "Secure client portal with automated document requests and tracking", s: 4 },
+      { t: "They're not — it lives in my head or my team's heads", s: 1 },
+      { t: "Some things are written down in emails or notes", s: 2 },
+      { t: "I have basic checklists or a shared doc", s: 3 },
+      { t: "Full SOPs documented, versioned, and accessible to the whole team", s: 4 },
     ]},
-  { id: 4, q: "How do you screen for conflicts of interest?",
+  { id: 4, q: "How do you manage your CRM and client pipeline?",
     opts: [
-      { t: "I rely on memory", s: 1 },
-      { t: "I search my email and old files manually", s: 2 },
-      { t: "I have a spreadsheet or database I check", s: 3 },
-      { t: "Automated conflict check integrated with my intake process", s: 4 },
+      { t: "I don't have a CRM — I use my inbox", s: 1 },
+      { t: "I track leads in a spreadsheet", s: 2 },
+      { t: "I use a CRM but it's not fully set up or consistently used", s: 3 },
+      { t: "CRM is configured, maintained, and drives my sales process", s: 4 },
     ]},
-  { id: 5, q: "What does your fee agreement process look like?",
+  { id: 5, q: "What does your client onboarding process look like?",
     opts: [
-      { t: "I explain fees verbally and sometimes follow up with a letter", s: 1 },
-      { t: "I have a standard template I edit and email for signature", s: 2 },
-      { t: "Clients sign digitally via DocuSign or similar", s: 3 },
-      { t: "Auto-generated from intake data, e-signed, and filed — no manual steps", s: 4 },
+      { t: "I figure it out each time", s: 1 },
+      { t: "I have some standard emails I send manually", s: 2 },
+      { t: "Clients sign agreements digitally and get a welcome packet", s: 3 },
+      { t: "Fully automated sequence — contract, onboarding, kickoff, all triggered on sign", s: 4 },
     ]},
-  { id: 6, q: "How do you track where each new matter stands in the intake pipeline?",
+  { id: 6, q: "How do you track where new business stands in your pipeline?",
     opts: [
       { t: "I keep it in my head", s: 1 },
       { t: "Sticky notes, a notebook, or a to-do list", s: 2 },
       { t: "A spreadsheet with statuses", s: 3 },
-      { t: "CRM or practice management software with pipeline stages", s: 4 },
+      { t: "CRM with pipeline stages, automations, and reporting", s: 4 },
     ]},
 ];
 
 function getGrade(score) {
   const pct = (score / 24) * 100;
-  if (pct >= 85) return { l:'A', lb:'Excellent', c:'#22c55e', s:"Your intake system is well-built. You're ahead of 90% of solo practitioners.", r:["Consider automated follow-up sequences for unconverted leads.","Audit your process quarterly.","Add client satisfaction surveys post-intake."] };
-  if (pct >= 70) return { l:'B', lb:'Solid', c:'#84cc16', s:"Good bones, but gaps are costing you clients. The leads that slip through? They're hiring your competitors.", r:["Automate initial response — every hour of delay drops conversion 10%.","Move document collection to a secure portal.","Build conflict checks into intake."] };
-  if (pct >= 50) return { l:'C', lb:'Needs Work', c:'#eab308', s:"You're running on manual effort and it's costing you. Every admin hour is an unbilled hour.", r:["Automate your first response immediately.","Digital fee agreements save 2–3 hours/week.","Track your pipeline somewhere other than your head."] };
-  if (pct >= 30) return { l:'D', lb:'At Risk', c:'#f97316', s:"Serious gaps actively costing you revenue and creating compliance risk.", r:["You need a structured intake workflow — not a better to-do list.","Email document collection is a malpractice risk.","A full audit would show exactly how much revenue you're leaving."] };
-  return { l:'F', lb:'Critical', c:'#ef4444', s:"Your intake process needs immediate attention. You're losing more clients than you're signing.", r:["Build a basic intake form today. Even a Google Form beats what you have.","Set up an auto-responder — 15 minutes, highest ROI change you can make.","Every week like this costs you 3–5 potential clients."] };
+  if (pct >= 85) return { l:'A', lb:'Excellent', c:'#22c55e', s:"Your operations are well-built. You're ahead of 90% of small businesses at your stage.", r:["Consider automated follow-up sequences for unconverted leads.","Audit your systems quarterly as you scale.","Add client satisfaction checkpoints to your onboarding flow."] };
+  if (pct >= 70) return { l:'B', lb:'Solid', c:'#84cc16', s:"Good bones, but gaps are costing you clients. The leads that slip through? They're hiring someone else.", r:["Automate initial response — every hour of delay drops conversion 10%.","Get your SOPs documented before you add headcount.","Fully configure your CRM — a half-setup CRM is worse than none."] };
+  if (pct >= 50) return { l:'C', lb:'Needs Work', c:'#eab308', s:"You're running on manual effort and it's costing you. Every hour spent on admin is an hour not spent on revenue.", r:["Automate your first lead response immediately.","Document your top 3 processes this week.","Track your pipeline somewhere other than your head."] };
+  if (pct >= 30) return { l:'D', lb:'At Risk', c:'#f97316', s:"Serious operational gaps — actively costing you revenue and limiting your ability to scale.", r:["You need structured workflows, not a better to-do list.","Without SOPs, every new hire is a liability.","A full systems audit would show exactly what you're leaving on the table."] };
+  return { l:'F', lb:'Critical', c:'#ef4444', s:"Your operations need immediate attention. You're losing business faster than you can replace it.", r:["Build a basic intake form today — even a Google Form is a start.","Set up an auto-responder. 15 minutes of work, highest ROI change you can make.","Every week without systems costs you 3–5 potential clients."] };
 }
 
 const IntakeGrader = () => {
@@ -158,7 +176,7 @@ const IntakeGrader = () => {
       </div>
       <div style={{ padding: '28px', background: BG, border: `1px solid ${BDR}`, textAlign: 'center' }}>
         <p style={{ fontSize: 16, fontWeight: 700, color: TXT, fontFamily: HEAD, letterSpacing: '0.05em', marginBottom: 6 }}>Want to fix this?</p>
-        <p style={{ fontSize: 13, color: MID, marginBottom: 20 }}>I build intake systems that actually work. Most clients see results in 30 days.</p>
+        <p style={{ fontSize: 13, color: MID, marginBottom: 20 }}>I build operational systems that actually work. Most clients see results in 30 days.</p>
         <a href="#contact" style={{ display: 'inline-block', padding: '12px 36px', background: ACC, color: '#fff', fontSize: 10, fontWeight: 700, letterSpacing: '0.2em', textTransform: 'uppercase', textDecoration: 'none', borderRadius: 2, fontFamily: MONO }}>Request an Audit</a>
       </div>
       <button onClick={reset} style={{ display: 'block', margin: '20px auto 0', padding: '8px 20px', background: 'transparent', border: `1px solid ${BDR}`, color: MID, fontSize: 10, fontWeight: 600, letterSpacing: '0.12em', textTransform: 'uppercase', cursor: 'pointer', fontFamily: MONO }}>Retake</button>
@@ -212,7 +230,7 @@ const PayPalButton = () => {
 
 // ─── Contact Form ─────────────────────────────────────────────────────────────
 const ContactForm = () => {
-  const [f,  setF]  = useState({ name: '', email: '', practice: '', pain: '', message: '' });
+  const [f,  setF]  = useState({ name: '', email: '', industry: '', pain: '', message: '' });
   const [st, setSt] = useState('idle');
   const u = (k, v) => setF(p => ({ ...p, [k]: v }));
 
@@ -221,9 +239,9 @@ const ContactForm = () => {
     try {
       const r = await fetch('https://formspree.io/f/xpwdjqkn', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: f.name, email: f.email, practice_area: f.practice, biggest_pain_point: f.pain, message: f.message }),
+        body: JSON.stringify({ name: f.name, email: f.email, industry: f.industry, biggest_pain_point: f.pain, message: f.message }),
       });
-      if (r.ok) { setSt('sent'); setF({ name: '', email: '', practice: '', pain: '', message: '' }); }
+      if (r.ok) { setSt('sent'); setF({ name: '', email: '', industry: '', pain: '', message: '' }); }
       else setSt('error');
     } catch { setSt('error'); }
   };
@@ -256,12 +274,12 @@ const ContactForm = () => {
         </div>
       </div>
       <div>
-        <label style={lbl}>Practice Area</label>
-        <select value={f.practice} onChange={e => u('practice', e.target.value)}
-          style={{ ...inp, color: f.practice ? TXT : '#3a4a5e', cursor: 'pointer' }}
+        <label style={lbl}>Industry</label>
+        <select value={f.industry} onChange={e => u('industry', e.target.value)}
+          style={{ ...inp, color: f.industry ? TXT : '#3a4a5e', cursor: 'pointer' }}
           onFocus={e => e.target.style.borderColor = ACC} onBlur={e => e.target.style.borderColor = BDR}>
-          <option value="" disabled>Select practice area</option>
-          {['Family Law','Criminal Defense','Personal Injury','Estate Planning','Immigration','Business / Corporate','Real Estate','Employment Law','Bankruptcy','General Practice','Other'].map(o => <option key={o} value={o}>{o}</option>)}
+          <option value="" disabled>Select your industry</option>
+          {['Legal','Real Estate','Consulting','Creative Services','Financial Services','Health & Wellness','Coaching / Training','E-Commerce','Construction / Trades','Veteran-Owned Business','Other Service Business'].map(o => <option key={o} value={o}>{o}</option>)}
         </select>
       </div>
       <div>
@@ -270,13 +288,13 @@ const ContactForm = () => {
           style={{ ...inp, color: f.pain ? TXT : '#3a4a5e', cursor: 'pointer' }}
           onFocus={e => e.target.style.borderColor = ACC} onBlur={e => e.target.style.borderColor = BDR}>
           <option value="" disabled>What keeps you up at night?</option>
-          {['Client intake is a mess','Losing leads / slow response time','Drowning in admin work','No systems / everything is manual','Tech stack is confusing or underused','Document management / compliance gaps','Billing and collections','Growing but cannot scale','Other'].map(o => <option key={o} value={o}>{o}</option>)}
+          {['Client intake is a mess','Losing leads / slow follow-up','Drowning in admin work','No documented systems or SOPs','CRM not set up or underused','Tech stack is overwhelming or underused','Billing and collections','Growing but cannot scale','Need a website or digital presence','Other'].map(o => <option key={o} value={o}>{o}</option>)}
         </select>
       </div>
       <div>
         <label style={lbl}>Message</label>
         <textarea required value={f.message} onChange={e => u('message', e.target.value)}
-          placeholder="Tell me about your practice and what you need..." rows={5}
+          placeholder="Tell me about your business and what you need..." rows={5}
           style={{ ...inp, resize: 'vertical', minHeight: 110 }}
           onFocus={e => e.target.style.borderColor = ACC} onBlur={e => e.target.style.borderColor = BDR} />
       </div>
@@ -300,22 +318,22 @@ const ContactForm = () => {
 const SERVICES = [
   {
     num: '01', title: 'Systems Audit',
-    desc: 'A full diagnostic of your intake, document management, billing, and client communication. You get a prioritized action plan — no fluff, no generics.',
-    tags: ['Intake Review', 'SOP Analysis', 'Gap Assessment'],
+    desc: 'A full diagnostic of your lead capture, client onboarding, internal workflows, and tech stack. You get a prioritized action plan — no fluff, no generics.',
+    tags: ['Operations Review', 'SOP Analysis', 'Gap Assessment'],
   },
   {
-    num: '02', title: 'Workflow Design',
-    desc: 'I map, build, and document your operational workflows. Client intake, conflict checks, document collection, fee agreements — all standardized and repeatable.',
+    num: '02', title: 'Workflow Design & SOPs',
+    desc: 'I map, build, and document your operational workflows. Lead intake, client onboarding, fulfillment, communications — all standardized, repeatable, and scalable.',
     tags: ['Process Mapping', 'SOP Creation', 'Template Library'],
   },
   {
-    num: '03', title: 'Tech Implementation',
-    desc: 'From Clio to Notion to custom-built tools — I configure, integrate, and train your team. No more underused subscriptions collecting dust.',
-    tags: ['CRM Setup', 'Automation', 'Training'],
+    num: '03', title: 'CRM & Tech Implementation',
+    desc: 'I configure, integrate, and deploy the tools your business actually needs — CRM setup, automation, and team training. No more underused subscriptions collecting dust.',
+    tags: ['CRM Setup', 'Automation', 'Tech Training'],
   },
   {
     num: '04', title: 'Digital Presence',
-    desc: 'Custom websites, brand identity, and technical deployment for firms that need to look the part. Built from scratch, no templates.',
+    desc: 'Custom websites, brand identity, and technical deployment for businesses that need to look the part. Built from scratch, no templates. We work with legal, real estate, consulting, creative services, and service-based businesses.',
     tags: ['Web Development', 'Brand Identity', 'SEO'],
   },
 ];
@@ -324,19 +342,19 @@ const PRODUCTS = [
   {
     name: 'Intake SOP Starter Kit',
     price: '$97',
-    desc: 'Complete intake workflow templates — conflict check, fee agreement, onboarding sequence. Plug in your firm name and deploy.',
+    desc: 'Complete client intake workflow templates — lead capture, onboarding sequence, and handoff checklist. Plug in your business info and deploy same day.',
     tag: 'Instant Download',
   },
   {
     name: 'Operations Playbook',
     price: '$147',
-    desc: 'A comprehensive operations manual template for solo practitioners. Covers intake through file closing, client comms, and billing protocols.',
+    desc: 'A comprehensive operations manual template for solo operators and small teams. Covers intake through delivery, client comms, and billing protocols.',
     tag: 'Instant Download',
   },
   {
     name: 'Tech Stack Audit',
     price: '$297',
-    desc: 'Submit your current tools and workflows. I review everything and deliver a written report with specific upgrade recommendations.',
+    desc: 'Submit your current tools and workflows. I review everything and deliver a written report with specific upgrade and consolidation recommendations.',
     tag: '48hr Turnaround',
   },
 ];
@@ -373,14 +391,14 @@ const Home = () => {
             initial={{ opacity: 0, y: 32 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}>
-            <Label>Operational Consulting — Legal Technology</Label>
+            <Label>Operational Consulting — Small Business Infrastructure</Label>
             <h1 style={{
               fontFamily: HEAD,
               fontSize: 'clamp(72px, 10vw, 140px)',
               lineHeight: 0.92, letterSpacing: '0.02em',
               color: TXT, marginBottom: 40,
             }}>
-              Your practice<br />runs on systems.<br />
+              Your business<br />runs on systems.<br />
               <span style={{ color: ACC }}>Most are broken.</span>
             </h1>
           </motion.div>
@@ -388,10 +406,9 @@ const Home = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
-            style={{ maxWidth: 520 }}>
+            style={{ maxWidth: 560 }}>
             <p style={{ fontSize: 16, lineHeight: 1.8, color: '#6b7f99', marginBottom: 40 }}>
-              15 years in banking, insurance, and risk assessment — now applied to the firms that need it most.
-              I fix the operational chaos that keeps solo attorneys buried in admin instead of practicing law.
+              15 years in banking, insurance, and risk — now applied to small businesses, solo operators, and veteran-owned companies who need real infrastructure, not guesswork.
             </p>
             <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap' }} className="vvv-hero-ctas">
               <a href="#tools" style={{
@@ -401,7 +418,7 @@ const Home = () => {
               }}
                 onMouseEnter={e => e.target.style.background = ACCL}
                 onMouseLeave={e => e.target.style.background = ACC}>
-                Grade Your Intake
+                Grade Your Operations
               </a>
               <a href="#services" style={{
                 padding: '14px 36px', background: 'transparent',
@@ -457,13 +474,13 @@ const Home = () => {
             <FadeUp>
               <Label>Free Tool</Label>
               <h2 style={{ fontFamily: HEAD, fontSize: 'clamp(48px, 6vw, 80px)', color: TXT, letterSpacing: '0.03em', marginBottom: 24, lineHeight: 1 }}>
-                GRADE YOUR<br />INTAKE
+                GRADE YOUR<br />OPERATIONS
               </h2>
               <p style={{ fontSize: 15, lineHeight: 1.8, color: '#6b7f99', marginBottom: 32 }}>
-                Six questions. Two minutes. Know exactly where your client intake is failing — and what it's costing you.
+                Six questions. Two minutes. Know exactly where your business operations are failing — and what it's costing you.
               </p>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-                {['Identify your biggest operational gaps','Get a letter grade with specific recommendations','See what your peers are doing better'].map((item, i) => (
+                {['Identify your biggest operational gaps','Get a letter grade with specific recommendations','See what high-performing businesses are doing differently'].map((item, i) => (
                   <div key={i} style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
                     <span style={{ color: ACC, fontFamily: MONO, fontSize: 10, marginTop: 3 }}>→</span>
                     <span style={{ fontSize: 14, color: '#6b7f99' }}>{item}</span>
@@ -584,30 +601,33 @@ const Home = () => {
                 THE OPERATOR<br />BEHIND THE SYSTEM
               </h2>
               <p style={{ fontSize: 15, lineHeight: 1.85, color: '#6b7f99', marginBottom: 20 }}>
-                I spent 15 years inside the institutions that write the compliance rules — banking, insurance, risk assessment. USAA. American Express. I know what a functioning system looks like from the inside, and I know what happens when it breaks.
+                I fix the operational and digital chaos that keeps small businesses from scaling. 15 years inside the institutions that run on systems — banking, insurance, risk assessment. USAA. American Express. I know what functioning infrastructure looks like from the inside, and I know exactly what it costs when it breaks.
               </p>
               <p style={{ fontSize: 15, lineHeight: 1.85, color: '#6b7f99', marginBottom: 20 }}>
-                Now I apply that experience to law firms — the businesses that are most in need of operational infrastructure and least likely to have someone building it.
+                Now I apply that experience to small businesses, solo operators, and veteran-owned companies who are growing faster than their systems — and need someone who can build the infrastructure to catch up.
               </p>
               <p style={{ fontSize: 15, lineHeight: 1.85, color: '#6b7f99' }}>
-                U.S. Army veteran. Founder of VVV Digitals LLC. Based in Glendale, Arizona. I work with solo practitioners and small firms across the country.
+                U.S. Army veteran. Founder of VVV Digitals LLC. Based in Glendale, Arizona. We work with legal, real estate, consulting, creative services, and service-based businesses nationwide.
               </p>
             </FadeUp>
             <FadeUp delay={0.12}>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 2, background: BDR, border: `1px solid ${BDR}` }}>
-                {[
-                  { label: 'Years of Experience', value: '15+' },
-                  { label: 'Background', value: 'Banking · Insurance · Risk' },
-                  { label: 'Military', value: 'U.S. Army Veteran' },
-                  { label: 'Location', value: 'Glendale, AZ' },
-                  { label: 'Focus', value: 'Solo & Small Law Firms' },
-                  { label: 'Certifications', value: 'VOSB · WOSB · 8(a) Pending' },
-                ].map(({ label, value }) => (
-                  <div key={label} style={{ background: BGC, padding: '20px 24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <span style={{ fontFamily: MONO, fontSize: 10, letterSpacing: '0.15em', textTransform: 'uppercase', color: MID }}>{label}</span>
-                    <span style={{ fontSize: 14, fontWeight: 500, color: TXT }}>{value}</span>
-                  </div>
-                ))}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+                <BlinkingAvatar />
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 2, background: BDR, border: `1px solid ${BDR}` }}>
+                  {[
+                    { label: 'Years of Experience', value: '15+' },
+                    { label: 'Background', value: 'Banking · Insurance · Risk' },
+                    { label: 'Military', value: 'U.S. Army Veteran' },
+                    { label: 'Location', value: 'Glendale, AZ' },
+                    { label: 'Focus', value: 'Small Business · Solo Operators · Veteran-Owned' },
+                    { label: 'Certifications', value: 'VOSB · WOSB · 8(a) Pending' },
+                  ].map(({ label, value }) => (
+                    <div key={label} style={{ background: BGC, padding: '20px 24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 8 }}>
+                      <span style={{ fontFamily: MONO, fontSize: 10, letterSpacing: '0.15em', textTransform: 'uppercase', color: MID }}>{label}</span>
+                      <span style={{ fontSize: 13, fontWeight: 500, color: TXT, textAlign: 'right' }}>{value}</span>
+                    </div>
+                  ))}
+                </div>
               </div>
             </FadeUp>
           </div>
