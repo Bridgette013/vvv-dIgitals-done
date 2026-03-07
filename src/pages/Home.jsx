@@ -3,6 +3,27 @@ import { Link } from 'react-router-dom';
 import { motion, useInView } from 'framer-motion';
 import Nav from '../components/Nav';
 
+// ─── Blinking Avatar ──────────────────────────────────────────────────────────
+const BlinkingAvatar = () => (
+  <div style={{ width: '100%', maxWidth: 320, margin: '0 auto' }}>
+    <style>{`
+      @keyframes avatarBlink {
+        0%, 88%, 100% { opacity: 0; }
+        92%, 96%      { opacity: 1; }
+      }
+    `}</style>
+    <div style={{ position: 'relative', border: '1px solid #1a2332', overflow: 'hidden', lineHeight: 0 }}>
+      <img src="/avatar-open.png" alt="Brit — Founder, VVV Digitals" style={{ width: '100%', display: 'block' }} />
+      <img src="/avatar-wink.png" alt="" aria-hidden="true" style={{
+        position: 'absolute', top: 0, left: 0,
+        width: '100%', display: 'block',
+        opacity: 0,
+        animation: 'avatarBlink 5s ease-in-out infinite',
+      }} />
+    </div>
+  </div>
+);
+
 // ─── Tokens ───────────────────────────────────────────────────────────────────
 const BG   = '#080d14';
 const BG2  = '#0c1220';
@@ -593,6 +614,8 @@ const Home = () => {
               </p>
             </FadeUp>
             <FadeUp delay={0.12}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+              <BlinkingAvatar />
               <div style={{ display: 'flex', flexDirection: 'column', gap: 2, background: BDR, border: `1px solid ${BDR}` }}>
                   {[
                     { label: 'Years of Experience', value: '15+' },
@@ -608,6 +631,7 @@ const Home = () => {
                     </div>
                   ))}
                 </div>
+              </div>
             </FadeUp>
           </div>
         </div>
