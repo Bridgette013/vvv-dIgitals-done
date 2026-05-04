@@ -587,8 +587,8 @@ const AeroAdix = () => {
         flexWrap: 'wrap', gap: 16,
       }}>
         <div style={{ maxWidth: 1200, margin: '0 auto', width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 16 }}>
-          <Link to="/" style={{ fontFamily: MONO, fontSize: 12, letterSpacing: '0.15em', color: MID, textDecoration: 'none' }}>
-            VVV / DIGITALS
+          <Link to="/" style={{ display: 'flex', alignItems: 'center', textDecoration: 'none' }}>
+            <img src="/brand/vvv-digitals-horizontal-light.svg" alt="VVV Digitals" style={{ height: 22, width: 'auto', display: 'block', opacity: 0.7 }} />
           </Link>
           <span style={{ fontFamily: MONO, fontSize: 10, color: BDR, letterSpacing: '0.1em' }}>
             © 2026 VVV Digitals LLC — Glendale, AZ

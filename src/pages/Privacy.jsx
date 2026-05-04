@@ -23,7 +23,7 @@ const Privacy = () => (
       <h1 style={{ fontFamily: HEAD, fontSize: 64, color: TXT, letterSpacing: '0.03em', marginBottom: 48, lineHeight: 1 }}>PRIVACY POLICY</h1>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 32 }}>
         {[
-          { title: 'Information We Collect', body: 'We collect information you provide directly, such as your name, email address, practice area, and any details you share through our contact form. We do not collect payment information directly — all transactions are processed through PayPal.' },
+          { title: 'Information We Collect', body: 'We collect information you provide directly, such as your name, email address, practice area, and any details you share through our contact form. We do not collect payment information directly through this website.' },
           { title: 'How We Use Your Information', body: 'Information you provide is used solely to respond to your inquiry and provide requested services. We do not sell, rent, or share your personal information with third parties for marketing purposes.' },
           { title: 'Contact Form Data', body: 'Form submissions are processed through Formspree. By submitting the contact form, you agree to their privacy policy in addition to ours. We retain form data only as long as necessary to respond to your inquiry.' },
           { title: 'Cookies', body: 'This website uses minimal cookies necessary for functionality. We do not use tracking cookies or third-party advertising cookies.' },

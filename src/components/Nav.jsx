@@ -45,14 +45,12 @@ const Nav = () => {
           display: 'flex', alignItems: 'center',
           justifyContent: 'space-between',
         }}>
-          <Link to="/" style={{ textDecoration: 'none' }}>
-            <span style={{
-              fontFamily: "'DM Mono', monospace",
-              fontSize: 13, fontWeight: 500,
-              letterSpacing: '0.2em', color: TXT,
-            }}>
-              VVV <span style={{ color: MID }}>/</span> DIGITALS
-            </span>
+          <Link to="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center' }}>
+            <img
+              src="/brand/vvv-digitals-horizontal-light.svg"
+              alt="VVV Digitals"
+              style={{ height: 26, width: 'auto', display: 'block' }}
+            />
           </Link>
 
           {/* Desktop */}

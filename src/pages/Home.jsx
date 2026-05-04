@@ -3,23 +3,11 @@ import { Link } from 'react-router-dom';
 import { motion, useInView } from 'framer-motion';
 import Nav from '../components/Nav';
 
-// ─── Blinking Avatar ──────────────────────────────────────────────────────────
-const BlinkingAvatar = () => (
+// ─── Avatar ───────────────────────────────────────────────────────────────────
+const Avatar = () => (
   <div style={{ width: '100%', maxWidth: 320, margin: '0 auto' }}>
-    <style>{`
-      @keyframes avatarBlink {
-        0%, 88%, 100% { opacity: 0; }
-        92%, 96%      { opacity: 1; }
-      }
-    `}</style>
-    <div style={{ position: 'relative', border: '1px solid #1a2332', overflow: 'hidden', lineHeight: 0 }}>
-      <img src="/avatar-open.png" alt="Brit — Founder, VVV Digitals" style={{ width: '100%', display: 'block' }} />
-      <img src="/avatar-wink.png" alt="" aria-hidden="true" style={{
-        position: 'absolute', top: 0, left: 0,
-        width: '100%', display: 'block',
-        opacity: 0,
-        animation: 'avatarBlink 5s ease-in-out infinite',
-      }} />
+    <div style={{ lineHeight: 0 }}>
+      <img src="/avatar.png" alt="Brit — Founder, VVV Digitals" style={{ width: '100%', display: 'block' }} />
     </div>
   </div>
 );
@@ -213,22 +201,57 @@ const IntakeGrader = () => {
   );
 };
 
-// ─── PayPal ───────────────────────────────────────────────────────────────────
-const PayPalButton = () => {
-  const containerRef = useRef(null);
-  const rendered     = useRef(false);
-  useEffect(() => {
-    if (rendered.current) return;
-    const interval = setInterval(() => {
-      if (window.paypal?.HostedButtons && containerRef.current) {
-        clearInterval(interval);
-        rendered.current = true;
-        window.paypal.HostedButtons({ hostedButtonId: "XPWQ88B2QH35W" }).render(containerRef.current);
-      }
-    }, 200);
-    return () => clearInterval(interval);
-  }, []);
-  return <div ref={containerRef} style={{ minHeight: 52 }} />;
+// ─── Quick Contact (compact form for inline panel) ────────────────────────────
+const QuickContactForm = () => {
+  const [f,  setF]  = useState({ name: '', email: '', message: '' });
+  const [st, setSt] = useState('idle');
+  const u = (k, v) => setF(p => ({ ...p, [k]: v }));
+
+  const submit = async (e) => {
+    e.preventDefault(); setSt('sending');
+    try {
+      const r = await fetch('https://formspree.io/f/xpwdjqkn', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: f.name, email: f.email, message: f.message, source: 'Quick Contact' }),
+      });
+      if (r.ok) { setSt('sent'); setF({ name: '', email: '', message: '' }); }
+      else setSt('error');
+    } catch { setSt('error'); }
+  };
+
+  const inp = { width: '100%', padding: '11px 14px', background: '#0c1220', border: `1px solid ${BDR}`, color: TXT, fontSize: 12, fontFamily: SANS, outline: 'none', borderRadius: 2, transition: 'border-color 0.2s' };
+
+  if (st === 'sent') return (
+    <div style={{ padding: '12px 0', display: 'flex', alignItems: 'center', gap: 12 }}>
+      <span style={{ color: ACC, fontSize: 18 }}>✓</span>
+      <span style={{ fontFamily: MONO, fontSize: 11, color: MID, letterSpacing: '0.1em' }}>Message received. I'll respond within one business day.</span>
+    </div>
+  );
+
+  return (
+    <form onSubmit={submit} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr auto', gap: 10, alignItems: 'start', width: '100%' }} className="vvv-quickcontact">
+      <input required type="text" value={f.name} onChange={e => u('name', e.target.value)} placeholder="Name" style={inp}
+        onFocus={e => e.target.style.borderColor = ACC} onBlur={e => e.target.style.borderColor = BDR} />
+      <input required type="email" value={f.email} onChange={e => u('email', e.target.value)} placeholder="Email" style={inp}
+        onFocus={e => e.target.style.borderColor = ACC} onBlur={e => e.target.style.borderColor = BDR} />
+      <button type="submit" disabled={st === 'sending'} style={{
+        padding: '11px 22px', background: ACC, color: '#fff',
+        fontSize: 10, fontWeight: 700, letterSpacing: '0.2em', textTransform: 'uppercase',
+        border: 'none', cursor: st === 'sending' ? 'wait' : 'pointer',
+        borderRadius: 2, fontFamily: MONO, opacity: st === 'sending' ? 0.6 : 1,
+        whiteSpace: 'nowrap', transition: 'background 0.2s',
+      }}
+        onMouseEnter={e => { if (st !== 'sending') e.target.style.background = ACCL; }}
+        onMouseLeave={e => e.target.style.background = ACC}>
+        {st === 'sending' ? '...' : 'Send →'}
+      </button>
+      <textarea required value={f.message} onChange={e => u('message', e.target.value)}
+        placeholder="What can I help with?" rows={2}
+        style={{ ...inp, gridColumn: '1 / -1', resize: 'vertical', minHeight: 64, fontFamily: SANS }}
+        onFocus={e => e.target.style.borderColor = ACC} onBlur={e => e.target.style.borderColor = BDR} />
+      {st === 'error' && <p style={{ gridColumn: '1 / -1', fontSize: 11, color: '#ef4444', fontFamily: MONO, margin: 0 }}>Something went wrong. Email admin@vvvdigitals.com directly.</p>}
+    </form>
+  );
 };
 
 // ─── Contact Form ─────────────────────────────────────────────────────────────
@@ -382,6 +405,9 @@ const Home = () => {
           .vvv-hero-ctas a   { text-align: center !important; }
           .vvv-tools-grid    { grid-template-columns: 1fr !important; }
           .vvv-contact-grid  { grid-template-columns: 1fr !important; }
+          .vvv-quickcontact-panel { grid-template-columns: 1fr !important; }
+          .vvv-quickcontact  { grid-template-columns: 1fr !important; }
+          .vvv-quickcontact button { width: 100% !important; }
         }
       `}</style>
 
@@ -538,6 +564,72 @@ const Home = () => {
               </div>
             </Link>
           </FadeUp>
+
+          <div style={{ height: 24 }} />
+
+          <FadeUp delay={0.15}>
+            <Link to="/work/periodic-table" style={{ textDecoration: 'none', display: 'block' }}>
+              <div style={{
+                border: `1px solid ${BDR}`, background: BGC,
+                transition: 'border-color 0.3s',
+                overflow: 'hidden',
+              }}
+                onMouseEnter={e => e.currentTarget.style.borderColor = `${ACC}55`}
+                onMouseLeave={e => e.currentTarget.style.borderColor = BDR}>
+                <div style={{
+                  aspectRatio: '16/6',
+                  overflow: 'hidden',
+                  background: 'radial-gradient(ellipse at top, #181410 0%, #0E0C09 70%)',
+                  position: 'relative',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}>
+                  <div style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(18, 1fr)',
+                    gap: 4,
+                    width: '70%',
+                    maxWidth: 720,
+                  }}>
+                    {Array.from({ length: 18 * 5 }).map((_, i) => {
+                      const palette = ['#E07A5F', '#E8B04B', '#7DA9C7', '#85B79D', '#C9A875', '#8FBC6E', '#5DADE2', '#B58CD9', '#D87FA0', '#D96E5C'];
+                      const c = palette[(i * 7) % palette.length];
+                      return (
+                        <div key={i} style={{
+                          aspectRatio: '1',
+                          background: `${c}26`,
+                          border: `1px solid ${c}66`,
+                          borderRadius: 2,
+                        }} />
+                      );
+                    })}
+                  </div>
+                  <div style={{
+                    position: 'absolute', inset: 0,
+                    background: 'linear-gradient(to bottom, transparent 40%, rgba(14,12,9,0.85) 100%)',
+                    display: 'flex', alignItems: 'flex-end', justifyContent: 'center', paddingBottom: 18,
+                  }}>
+                    <span style={{ fontFamily: "'Fraunces', Georgia, serif", color: '#F0E6D2', fontSize: 28, fontStyle: 'italic', fontWeight: 300, letterSpacing: '0.02em' }}>
+                      The <span style={{ fontWeight: 600, fontStyle: 'normal' }}>Periodic Table</span> of Elements
+                    </span>
+                  </div>
+                </div>
+                <div style={{ padding: '28px 32px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16, borderTop: `1px solid ${BDR}` }}>
+                  <div>
+                    <div style={{ fontFamily: MONO, fontSize: 9, letterSpacing: '0.2em', textTransform: 'uppercase', color: MID, marginBottom: 6 }}>Case Study — 002</div>
+                    <div style={{ fontFamily: HEAD, fontSize: 32, color: TXT, letterSpacing: '0.05em' }}>INTERACTIVE PERIODIC TABLE</div>
+                  </div>
+                  <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                    {['React', 'SVG', 'Tailwind', 'Animation'].map(t => (
+                      <span key={t} style={{ fontFamily: MONO, fontSize: 9, letterSpacing: '0.12em', textTransform: 'uppercase', color: ACC, border: `1px solid ${ACC}33`, padding: '5px 10px' }}>{t}</span>
+                    ))}
+                  </div>
+                  <span style={{ fontFamily: MONO, fontSize: 10, letterSpacing: '0.15em', textTransform: 'uppercase', color: ACC }}>View Case Study →</span>
+                </div>
+              </div>
+            </Link>
+          </FadeUp>
         </div>
       </section>
 
@@ -580,12 +672,15 @@ const Home = () => {
           </div>
           <FadeUp delay={0.2}>
             <div style={{ marginTop: 2, background: BDR }}>
-              <div style={{ background: BGC, padding: '32px 28px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 20 }}>
+              <div style={{ background: BGC, padding: '32px 28px', display: 'grid', gridTemplateColumns: 'minmax(0, 280px) 1fr', gap: 32, alignItems: 'start' }} className="vvv-quickcontact-panel">
                 <div>
-                  <div style={{ fontFamily: MONO, fontSize: 9, letterSpacing: '0.2em', textTransform: 'uppercase', color: MID, marginBottom: 6 }}>Pay As You Go</div>
-                  <div style={{ fontFamily: HEAD, fontSize: 22, color: TXT, letterSpacing: '0.05em' }}>ONE-TIME PAYMENT — NO SUBSCRIPTION</div>
+                  <div style={{ fontFamily: MONO, fontSize: 9, letterSpacing: '0.2em', textTransform: 'uppercase', color: MID, marginBottom: 6 }}>Quick Contact</div>
+                  <div style={{ fontFamily: HEAD, fontSize: 22, color: TXT, letterSpacing: '0.05em', marginBottom: 8 }}>QUESTIONS? GET IN TOUCH.</div>
+                  <p style={{ fontSize: 12, color: MID, lineHeight: 1.6, fontFamily: SANS }}>
+                    Send a quick note and I'll respond within one business day.
+                  </p>
                 </div>
-                <PayPalButton />
+                <QuickContactForm />
               </div>
             </div>
           </FadeUp>
@@ -615,7 +710,7 @@ const Home = () => {
             </FadeUp>
             <FadeUp delay={0.12}>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
-              <BlinkingAvatar />
+              <Avatar />
               <div style={{ display: 'flex', flexDirection: 'column', gap: 2, background: BDR, border: `1px solid ${BDR}` }}>
                   {[
                     { label: 'Years of Experience', value: '15+' },
@@ -676,7 +771,7 @@ const Home = () => {
       {/* ── FOOTER ── */}
       <footer style={{ borderTop: `1px solid ${BDR}`, padding: '28px 32px' }}>
         <div style={{ maxWidth: 1200, margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 16 }}>
-          <span style={{ fontFamily: MONO, fontSize: 12, letterSpacing: '0.15em', color: MID }}>VVV / DIGITALS</span>
+          <img src="/brand/vvv-digitals-horizontal-light.svg" alt="VVV Digitals" style={{ height: 22, width: 'auto', display: 'block', opacity: 0.7 }} />
           <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap' }}>
             <Link to="/privacy" style={{ fontFamily: MONO, fontSize: 9, letterSpacing: '0.12em', textTransform: 'uppercase', color: BDR, textDecoration: 'none' }}>Privacy</Link>
             <Link to="/terms"   style={{ fontFamily: MONO, fontSize: 9, letterSpacing: '0.12em', textTransform: 'uppercase', color: BDR, textDecoration: 'none' }}>Terms</Link>
