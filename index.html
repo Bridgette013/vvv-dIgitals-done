@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
     <!-- Favicon / app icons -->
-    <link rel="icon" type="image/svg+xml" href="/brand/vvv-submark-dark.svg" />
+    <link rel="icon" type="image/svg+xml" href="/brand/favicon.svg" />
     <link rel="apple-touch-icon" href="/brand/vvv-submark-dark.png" />
 
     <title>VVV Digitals — Small Business Operations Consultant | Phoenix, AZ</title>
@@ -44,6 +44,23 @@
   </head>
   <body>
     <div id="root"></div>
+
+    <!-- Netlify form detection placeholders. Hidden, never displayed. -->
+    <form name="quick-contact" netlify netlify-honeypot="bot-field" hidden>
+      <input type="text" name="bot-field" />
+      <input type="text" name="name" />
+      <input type="email" name="email" />
+      <textarea name="message"></textarea>
+    </form>
+    <form name="contact" netlify netlify-honeypot="bot-field" hidden>
+      <input type="text" name="bot-field" />
+      <input type="text" name="name" />
+      <input type="email" name="email" />
+      <input type="text" name="industry" />
+      <input type="text" name="biggest_pain_point" />
+      <textarea name="message"></textarea>
+    </form>
+
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>

@@ -39,17 +39,25 @@ const Nav = () => {
         borderBottom: `1px solid ${scrolled ? BDR : 'transparent'}`,
         transition: 'all 0.3s',
       }}>
-        <div style={{
+        <div className="vvv-nav-inner" style={{
           maxWidth: 1200, margin: '0 auto',
-          padding: '0 32px', height: 64,
+          padding: '0 32px',
+          height: scrolled ? 64 : 120,
           display: 'flex', alignItems: 'center',
           justifyContent: 'space-between',
+          transition: 'height 0.3s ease',
         }}>
           <Link to="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center' }}>
             <img
+              className="vvv-nav-logo"
               src="/brand/vvv-digitals-horizontal-light.svg"
               alt="VVV Digitals"
-              style={{ height: 26, width: 'auto', display: 'block' }}
+              style={{
+                height: scrolled ? 28 : 80,
+                width: 'auto',
+                display: 'block',
+                transition: 'height 0.3s ease',
+              }}
             />
           </Link>
 
@@ -123,6 +131,8 @@ const Nav = () => {
         @media (max-width: 768px) {
           .vvv-desktop-nav   { display: none !important; }
           .vvv-mobile-toggle { display: block !important; }
+          .vvv-nav-inner     { height: 64px !important; }
+          .vvv-nav-logo      { height: 28px !important; }
         }
       `}</style>
     </>

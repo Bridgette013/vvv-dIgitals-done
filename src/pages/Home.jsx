@@ -3,6 +3,12 @@ import { Link } from 'react-router-dom';
 import { motion, useInView } from 'framer-motion';
 import Nav from '../components/Nav';
 
+// ─── Netlify Forms helper ─────────────────────────────────────────────────────
+const encodeForm = (data) =>
+  Object.keys(data)
+    .map((k) => encodeURIComponent(k) + '=' + encodeURIComponent(data[k]))
+    .join('&');
+
 // ─── Avatar ───────────────────────────────────────────────────────────────────
 const Avatar = () => (
   <div style={{ width: '100%', maxWidth: 320, margin: '0 auto' }}>
@@ -203,18 +209,19 @@ const IntakeGrader = () => {
 
 // ─── Quick Contact (compact form for inline panel) ────────────────────────────
 const QuickContactForm = () => {
-  const [f,  setF]  = useState({ name: '', email: '', message: '' });
+  const [f,  setF]  = useState({ name: '', email: '', message: '', 'bot-field': '' });
   const [st, setSt] = useState('idle');
   const u = (k, v) => setF(p => ({ ...p, [k]: v }));
 
   const submit = async (e) => {
     e.preventDefault(); setSt('sending');
     try {
-      const r = await fetch('https://formspree.io/f/xpwdjqkn', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: f.name, email: f.email, message: f.message, source: 'Quick Contact' }),
+      const r = await fetch('/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: encodeForm({ 'form-name': 'quick-contact', ...f }),
       });
-      if (r.ok) { setSt('sent'); setF({ name: '', email: '', message: '' }); }
+      if (r.ok) { setSt('sent'); setF({ name: '', email: '', message: '', 'bot-field': '' }); }
       else setSt('error');
     } catch { setSt('error'); }
   };
@@ -229,10 +236,22 @@ const QuickContactForm = () => {
   );
 
   return (
-    <form onSubmit={submit} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr auto', gap: 10, alignItems: 'start', width: '100%' }} className="vvv-quickcontact">
-      <input required type="text" value={f.name} onChange={e => u('name', e.target.value)} placeholder="Name" style={inp}
+    <form
+      name="quick-contact"
+      method="POST"
+      data-netlify="true"
+      data-netlify-honeypot="bot-field"
+      onSubmit={submit}
+      style={{ display: 'grid', gridTemplateColumns: '1fr 1fr auto', gap: 10, alignItems: 'start', width: '100%' }}
+      className="vvv-quickcontact"
+    >
+      <input type="hidden" name="form-name" value="quick-contact" />
+      <p hidden>
+        <label>Don't fill this out: <input name="bot-field" value={f['bot-field']} onChange={e => u('bot-field', e.target.value)} /></label>
+      </p>
+      <input required type="text" name="name" value={f.name} onChange={e => u('name', e.target.value)} placeholder="Name" style={inp}
         onFocus={e => e.target.style.borderColor = ACC} onBlur={e => e.target.style.borderColor = BDR} />
-      <input required type="email" value={f.email} onChange={e => u('email', e.target.value)} placeholder="Email" style={inp}
+      <input required type="email" name="email" value={f.email} onChange={e => u('email', e.target.value)} placeholder="Email" style={inp}
         onFocus={e => e.target.style.borderColor = ACC} onBlur={e => e.target.style.borderColor = BDR} />
       <button type="submit" disabled={st === 'sending'} style={{
         padding: '11px 22px', background: ACC, color: '#fff',
@@ -245,7 +264,7 @@ const QuickContactForm = () => {
         onMouseLeave={e => e.target.style.background = ACC}>
         {st === 'sending' ? '...' : 'Send →'}
       </button>
-      <textarea required value={f.message} onChange={e => u('message', e.target.value)}
+      <textarea required name="message" value={f.message} onChange={e => u('message', e.target.value)}
         placeholder="What can I help with?" rows={2}
         style={{ ...inp, gridColumn: '1 / -1', resize: 'vertical', minHeight: 64, fontFamily: SANS }}
         onFocus={e => e.target.style.borderColor = ACC} onBlur={e => e.target.style.borderColor = BDR} />
@@ -256,18 +275,19 @@ const QuickContactForm = () => {
 
 // ─── Contact Form ─────────────────────────────────────────────────────────────
 const ContactForm = () => {
-  const [f,  setF]  = useState({ name: '', email: '', industry: '', pain: '', message: '' });
+  const [f,  setF]  = useState({ name: '', email: '', industry: '', biggest_pain_point: '', message: '', 'bot-field': '' });
   const [st, setSt] = useState('idle');
   const u = (k, v) => setF(p => ({ ...p, [k]: v }));
 
   const submit = async (e) => {
     e.preventDefault(); setSt('sending');
     try {
-      const r = await fetch('https://formspree.io/f/xpwdjqkn', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: f.name, email: f.email, industry: f.industry, biggest_pain_point: f.pain, message: f.message }),
+      const r = await fetch('/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: encodeForm({ 'form-name': 'contact', ...f }),
       });
-      if (r.ok) { setSt('sent'); setF({ name: '', email: '', industry: '', pain: '', message: '' }); }
+      if (r.ok) { setSt('sent'); setF({ name: '', email: '', industry: '', biggest_pain_point: '', message: '', 'bot-field': '' }); }
       else setSt('error');
     } catch { setSt('error'); }
   };
@@ -286,22 +306,33 @@ const ContactForm = () => {
   );
 
   return (
-    <form onSubmit={submit} style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
+    <form
+      name="contact"
+      method="POST"
+      data-netlify="true"
+      data-netlify-honeypot="bot-field"
+      onSubmit={submit}
+      style={{ display: 'flex', flexDirection: 'column', gap: 18 }}
+    >
+      <input type="hidden" name="form-name" value="contact" />
+      <p hidden>
+        <label>Don't fill this out: <input name="bot-field" value={f['bot-field']} onChange={e => u('bot-field', e.target.value)} /></label>
+      </p>
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }} className="vvv-form-row">
         <div>
           <label style={lbl}>Name</label>
-          <input required type="text" value={f.name} onChange={e => u('name', e.target.value)} placeholder="Your name" style={inp}
+          <input required type="text" name="name" value={f.name} onChange={e => u('name', e.target.value)} placeholder="Your name" style={inp}
             onFocus={e => e.target.style.borderColor = ACC} onBlur={e => e.target.style.borderColor = BDR} />
         </div>
         <div>
           <label style={lbl}>Email</label>
-          <input required type="email" value={f.email} onChange={e => u('email', e.target.value)} placeholder="you@firm.com" style={inp}
+          <input required type="email" name="email" value={f.email} onChange={e => u('email', e.target.value)} placeholder="you@firm.com" style={inp}
             onFocus={e => e.target.style.borderColor = ACC} onBlur={e => e.target.style.borderColor = BDR} />
         </div>
       </div>
       <div>
         <label style={lbl}>Industry</label>
-        <select value={f.industry} onChange={e => u('industry', e.target.value)}
+        <select name="industry" value={f.industry} onChange={e => u('industry', e.target.value)}
           style={{ ...inp, color: f.industry ? TXT : '#3a4a5e', cursor: 'pointer' }}
           onFocus={e => e.target.style.borderColor = ACC} onBlur={e => e.target.style.borderColor = BDR}>
           <option value="" disabled>Select your industry</option>
@@ -310,8 +341,8 @@ const ContactForm = () => {
       </div>
       <div>
         <label style={lbl}>Biggest Pain Point</label>
-        <select value={f.pain} onChange={e => u('pain', e.target.value)}
-          style={{ ...inp, color: f.pain ? TXT : '#3a4a5e', cursor: 'pointer' }}
+        <select name="biggest_pain_point" value={f.biggest_pain_point} onChange={e => u('biggest_pain_point', e.target.value)}
+          style={{ ...inp, color: f.biggest_pain_point ? TXT : '#3a4a5e', cursor: 'pointer' }}
           onFocus={e => e.target.style.borderColor = ACC} onBlur={e => e.target.style.borderColor = BDR}>
           <option value="" disabled>What keeps you up at night?</option>
           {['Client intake is a mess','Losing leads / slow follow-up','Drowning in admin work','No documented systems or SOPs','CRM not set up or underused','Tech stack is overwhelming or underused','Billing and collections','Growing but cannot scale','Need a website or digital presence','Other'].map(o => <option key={o} value={o}>{o}</option>)}
@@ -319,7 +350,7 @@ const ContactForm = () => {
       </div>
       <div>
         <label style={lbl}>Message</label>
-        <textarea required value={f.message} onChange={e => u('message', e.target.value)}
+        <textarea required name="message" value={f.message} onChange={e => u('message', e.target.value)}
           placeholder="Tell me about your business and what you need..." rows={5}
           style={{ ...inp, resize: 'vertical', minHeight: 110 }}
           onFocus={e => e.target.style.borderColor = ACC} onBlur={e => e.target.style.borderColor = BDR} />
@@ -408,24 +439,49 @@ const Home = () => {
           .vvv-quickcontact-panel { grid-template-columns: 1fr !important; }
           .vvv-quickcontact  { grid-template-columns: 1fr !important; }
           .vvv-quickcontact button { width: 100% !important; }
+          .vvv-hero-avatar   { display: none !important; }
         }
       `}</style>
 
       <Nav />
 
       {/* ── HERO ── */}
-      <section style={{ padding: '120px 0 140px' }}>
+      <section style={{ padding: '120px 0 140px', position: 'relative' }}>
         <div style={sx}>
           <motion.div
             initial={{ opacity: 0, y: 32 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}>
+            transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+            style={{ position: 'relative' }}
+          >
             <Label>Operational Consulting — Small Business Infrastructure</Label>
+
+            {/* Avatar sitting on top of "runs on systems." */}
+            <motion.img
+              src="/avata_sitr.png"
+              alt="Brit — Founder, VVV Digitals"
+              className="vvv-hero-avatar"
+              initial={{ opacity: 0, y: 24 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.9, delay: 0.4, ease: [0.22, 1, 0.36, 1] }}
+              style={{
+                position: 'absolute',
+                right: '20%',
+                bottom: '25%',
+                width: 'clamp(140px, 17vw, 240px)',
+                height: 'auto',
+                pointerEvents: 'none',
+                zIndex: 2,
+                filter: 'drop-shadow(0 12px 32px rgba(0,0,0,0.45))',
+              }}
+            />
+
             <h1 style={{
               fontFamily: HEAD,
               fontSize: 'clamp(72px, 10vw, 140px)',
               lineHeight: 0.92, letterSpacing: '0.02em',
               color: TXT, marginBottom: 40,
+              position: 'relative', zIndex: 1,
             }}>
               Your business<br />runs on systems.<br />
               <span style={{ color: ACC }}>Most are broken.</span>

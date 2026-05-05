@@ -25,7 +25,7 @@ const Privacy = () => (
         {[
           { title: 'Information We Collect', body: 'We collect information you provide directly, such as your name, email address, practice area, and any details you share through our contact form. We do not collect payment information directly through this website.' },
           { title: 'How We Use Your Information', body: 'Information you provide is used solely to respond to your inquiry and provide requested services. We do not sell, rent, or share your personal information with third parties for marketing purposes.' },
-          { title: 'Contact Form Data', body: 'Form submissions are processed through Formspree. By submitting the contact form, you agree to their privacy policy in addition to ours. We retain form data only as long as necessary to respond to your inquiry.' },
+          { title: 'Contact Form Data', body: 'Form submissions are processed through Netlify Forms (our hosting provider). By submitting the contact form, you agree to their privacy policy in addition to ours. We retain form data only as long as necessary to respond to your inquiry.' },
           { title: 'Cookies', body: 'This website uses minimal cookies necessary for functionality. We do not use tracking cookies or third-party advertising cookies.' },
           { title: 'Data Security', body: 'We take reasonable measures to protect your information. However, no method of transmission over the internet is 100% secure.' },
           { title: 'Contact', body: 'For privacy-related questions, contact us at admin@vvvdigitals.com.' },
