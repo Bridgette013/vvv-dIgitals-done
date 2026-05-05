@@ -15,8 +15,12 @@ const Nav = () => {
   const isHome   = location.pathname === '/';
 
   useEffect(() => {
-    const h = () => setScrolled(window.scrollY > 40);
-    window.addEventListener('scroll', h);
+    const h = () => {
+      const y = window.scrollY;
+      setScrolled(prev => (prev ? y > 20 : y > 60));
+    };
+    h();
+    window.addEventListener('scroll', h, { passive: true });
     return () => window.removeEventListener('scroll', h);
   }, []);
 
@@ -37,7 +41,7 @@ const Nav = () => {
         background: scrolled ? 'rgba(8,13,20,0.95)' : 'transparent',
         backdropFilter: scrolled ? 'blur(16px)' : 'none',
         borderBottom: `1px solid ${scrolled ? BDR : 'transparent'}`,
-        transition: 'all 0.3s',
+        transition: 'background 0.3s, border-color 0.3s, backdrop-filter 0.3s',
       }}>
         <div className="vvv-nav-inner" style={{
           maxWidth: 1200, margin: '0 auto',
