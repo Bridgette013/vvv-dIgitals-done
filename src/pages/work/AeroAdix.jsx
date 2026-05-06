@@ -1,609 +1,1527 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import { Helmet } from 'react-helmet-async';
 import { Link } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
-import Nav from '../../components/Nav';
-import { screenshots, meta } from '../../data/aeroadix-screenshots';
 
-// ─── Design tokens ─────────────────────────────────────────────────────────────
-const BG   = '#080d14';
-const BG2  = '#0c1220';
-const BGC  = '#0f1520';
-const BDR  = '#1a2332';
-const ACC  = '#3B6EF8';
-const MID  = '#4a5568';
-const TXT  = '#E8EDF5';
-const MONO = "'DM Mono', monospace";
-const HEAD = "'Bebas Neue', cursive";
-const SANS = "'DM Sans', sans-serif";
+/**
+ * AeroAdix Case Study
+ * Route: /work/aeroadix
+ * Screenshots served from: /work/aeroadix/screenshots/
+ *
+ * Self-contained component — all styles scoped under .aa-cs to avoid
+ * collision with VVV Digitals site styles. Drop-in ready.
+ */
 
-// ─── Sub-components ────────────────────────────────────────────────────────────
-const Label = ({ children }) => (
-  <div style={{
-    fontFamily: MONO, fontSize: 10, fontWeight: 500,
-    letterSpacing: '0.22em', textTransform: 'uppercase',
-    color: ACC, marginBottom: 20,
-    display: 'flex', alignItems: 'center', gap: 12,
-  }}>
-    <span style={{ width: 32, height: 1, background: ACC, display: 'inline-block' }} />
-    {children}
-  </div>
-);
+const SHOTS = '/work/aeroadix/screenshots';
+const SITE_URL = 'https://vvvdigitals.com';
+const PAGE_URL = `${SITE_URL}/work/aeroadix`;
+const OG_IMAGE = `${SITE_URL}/work/aeroadix/og-image.png`; // TEMP: using a homepage screenshot until a 1200x630 OG card is designed
 
-const Divider = () => (
-  <div style={{ width: '100%', height: 1, background: BDR }} />
-);
-
-// ─── Lightbox ──────────────────────────────────────────────────────────────────
-const Lightbox = ({ images, index, onClose, onNav }) => {
-  const img = images[index];
-
-  useEffect(() => {
-    const handler = (e) => {
-      if (e.key === 'Escape') onClose();
-      if (e.key === 'ArrowRight') onNav(1);
-      if (e.key === 'ArrowLeft')  onNav(-1);
-    };
-    window.addEventListener('keydown', handler);
-    document.body.style.overflow = 'hidden';
-    return () => {
-      window.removeEventListener('keydown', handler);
-      document.body.style.overflow = '';
-    };
-  }, [onClose, onNav]);
-
-  return (
-    <AnimatePresence>
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        transition={{ duration: 0.2 }}
-        onClick={onClose}
-        style={{
-          position: 'fixed', inset: 0, zIndex: 1000,
-          background: 'rgba(5,8,14,0.96)',
-          display: 'flex', flexDirection: 'column',
-          alignItems: 'center', justifyContent: 'center',
-          padding: '24px',
-        }}
-      >
-        {/* Close */}
-        <button
-          onClick={onClose}
-          style={{
-            position: 'absolute', top: 24, right: 28,
-            background: 'none', border: `1px solid ${BDR}`,
-            color: MID, fontFamily: MONO, fontSize: 10,
-            letterSpacing: '0.15em', textTransform: 'uppercase',
-            padding: '6px 14px', cursor: 'pointer',
-            transition: 'all 0.2s',
-          }}
-          onMouseEnter={e => { e.target.style.borderColor = TXT; e.target.style.color = TXT; }}
-          onMouseLeave={e => { e.target.style.borderColor = BDR; e.target.style.color = MID; }}
-        >
-          ESC / Close
-        </button>
-
-        {/* Image */}
-        <motion.div
-          key={index}
-          initial={{ opacity: 0, scale: 0.96 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.25 }}
-          onClick={e => e.stopPropagation()}
-          style={{ maxWidth: 1200, width: '100%' }}
-        >
-          <img
-            src={img.src}
-            alt={img.caption}
-            style={{
-              width: '100%', maxHeight: '72vh',
-              objectFit: 'contain',
-              border: `1px solid ${BDR}`,
-              display: 'block',
-            }}
-          />
-          <p style={{
-            fontFamily: MONO, fontSize: 10,
-            letterSpacing: '0.15em', textTransform: 'uppercase',
-            color: MID, marginTop: 16, textAlign: 'center',
-          }}>
-            {img.caption}
-          </p>
-        </motion.div>
-
-        {/* Nav */}
-        <div
-          onClick={e => e.stopPropagation()}
-          style={{ display: 'flex', alignItems: 'center', gap: 24, marginTop: 24 }}
-        >
-          <button
-            onClick={() => onNav(-1)}
-            disabled={index === 0}
-            style={{
-              background: 'none', border: `1px solid ${BDR}`,
-              color: index === 0 ? BDR : MID,
-              fontFamily: MONO, fontSize: 10, letterSpacing: '0.15em',
-              textTransform: 'uppercase', padding: '8px 20px',
-              cursor: index === 0 ? 'default' : 'pointer',
-              transition: 'all 0.2s',
-            }}
-            onMouseEnter={e => { if (index > 0) { e.target.style.borderColor = ACC; e.target.style.color = ACC; }}}
-            onMouseLeave={e => { e.target.style.borderColor = BDR; e.target.style.color = index === 0 ? BDR : MID; }}
-          >
-            ← Prev
-          </button>
-          <span style={{ fontFamily: MONO, fontSize: 10, color: MID, letterSpacing: '0.1em' }}>
-            {index + 1} / {images.length}
-          </span>
-          <button
-            onClick={() => onNav(1)}
-            disabled={index === images.length - 1}
-            style={{
-              background: 'none', border: `1px solid ${BDR}`,
-              color: index === images.length - 1 ? BDR : MID,
-              fontFamily: MONO, fontSize: 10, letterSpacing: '0.15em',
-              textTransform: 'uppercase', padding: '8px 20px',
-              cursor: index === images.length - 1 ? 'default' : 'pointer',
-              transition: 'all 0.2s',
-            }}
-            onMouseEnter={e => { if (index < images.length - 1) { e.target.style.borderColor = ACC; e.target.style.color = ACC; }}}
-            onMouseLeave={e => { e.target.style.borderColor = BDR; e.target.style.color = index === images.length - 1 ? BDR : MID; }}
-          >
-            Next →
-          </button>
-        </div>
-      </motion.div>
-    </AnimatePresence>
-  );
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Article',
+  headline: 'AeroAdix · Production ecommerce + owner-operated CMS',
+  description:
+    'A production-grade React + Vite ecommerce site and self-serve Supabase-powered CMS, built end-to-end for a CFD-engineered, 3D-printed performance aerodynamics brand. Built by VVV Digitals.',
+  image: OG_IMAGE,
+  url: PAGE_URL,
+  datePublished: '2026-04-26',
+  dateModified: '2026-05-06',
+  author: {
+    '@type': 'Organization',
+    name: 'VVV Digitals LLC',
+    url: SITE_URL,
+  },
+  publisher: {
+    '@type': 'Organization',
+    name: 'VVV Digitals LLC',
+    url: SITE_URL,
+  },
+  about: {
+    '@type': 'CreativeWork',
+    name: 'AeroAdix Fabrication Solutions',
+    url: 'https://aeroadix.com',
+  },
+  keywords:
+    'case study, ecommerce, React, Vite, Supabase, Stripe, Netlify, CMS, headless commerce, VVV Digitals, AeroAdix, 3D-printed aerodynamics, web development, portfolio',
 };
 
-// ─── Gallery Grid ──────────────────────────────────────────────────────────────
-const Gallery = ({ images }) => {
-  const [lightboxIndex, setLightboxIndex] = useState(null);
-
-  const handleNav = useCallback((dir) => {
-    setLightboxIndex(i => {
-      const next = i + dir;
-      if (next < 0 || next >= images.length) return i;
-      return next;
-    });
-  }, [images.length]);
-
+export default function AeroAdix() {
   return (
     <>
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))',
-        gap: 2,
-        background: BDR,
-        border: `1px solid ${BDR}`,
-        marginTop: 40,
-      }}>
-        {images.map((img, i) => (
-          <motion.div
-            key={img.id}
-            initial={{ opacity: 0, y: 16 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: '-40px' }}
-            transition={{ duration: 0.5, delay: i * 0.07 }}
-            onClick={() => setLightboxIndex(i)}
-            style={{
-              background: BGC, cursor: 'pointer',
-              position: 'relative', overflow: 'hidden',
-            }}
-          >
-            {/* Image */}
-            <div style={{ aspectRatio: '16/9', overflow: 'hidden' }}>
-              <img
-                src={img.src}
-                alt={img.caption}
-                loading="lazy"
-                style={{
-                  width: '100%', height: '100%',
-                  objectFit: 'cover', display: 'block',
-                  transition: 'transform 0.4s ease',
-                }}
-                onMouseEnter={e => e.target.style.transform = 'scale(1.04)'}
-                onMouseLeave={e => e.target.style.transform = 'scale(1)'}
-              />
-            </div>
-
-            {/* Hover overlay */}
-            <div style={{
-              position: 'absolute', inset: 0,
-              background: 'rgba(8,13,20,0)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              transition: 'background 0.3s',
-            }}
-              onMouseEnter={e => e.currentTarget.style.background = 'rgba(8,13,20,0.55)'}
-              onMouseLeave={e => e.currentTarget.style.background = 'rgba(8,13,20,0)'}
-            >
-              <span style={{
-                fontFamily: MONO, fontSize: 10, letterSpacing: '0.2em',
-                textTransform: 'uppercase', color: TXT,
-                opacity: 0, transition: 'opacity 0.3s',
-                padding: '8px 16px', border: `1px solid ${ACC}`,
-              }}
-                className="gallery-zoom-label"
-              >
-                View
-              </span>
-            </div>
-
-            {/* Caption */}
-            <div style={{ padding: '12px 16px', borderTop: `1px solid ${BDR}` }}>
-              <p style={{
-                fontFamily: MONO, fontSize: 9,
-                letterSpacing: '0.15em', textTransform: 'uppercase',
-                color: MID, margin: 0,
-              }}>
-                {img.caption}
-              </p>
-            </div>
-          </motion.div>
-        ))}
-      </div>
-
-      <style>{`
-        .gallery-zoom-label { opacity: 0 !important; }
-        div:hover > .gallery-zoom-label { opacity: 1 !important; }
-      `}</style>
-
-      {lightboxIndex !== null && (
-        <Lightbox
-          images={images}
-          index={lightboxIndex}
-          onClose={() => setLightboxIndex(null)}
-          onNav={handleNav}
+      <Helmet>
+        <title>AeroAdix — Production ecommerce + owner-operated CMS · VVV Digitals</title>
+        <meta
+          name="description"
+          content="A production-grade React + Vite ecommerce site and self-serve Supabase CMS, built end-to-end in ten weeks for a CFD-engineered aerodynamics brand. Case study from VVV Digitals."
         />
-      )}
-    </>
-  );
-};
+        <link rel="canonical" href={PAGE_URL} />
 
-// ─── Stack grid ────────────────────────────────────────────────────────────────
-const stackItems = [
-  { cat: 'Framework',      tech: 'React + Vite' },
-  { cat: 'Styling',        tech: 'Tailwind CSS' },
-  { cat: 'Animation',      tech: 'Framer Motion' },
-  { cat: 'Deployment',     tech: 'Netlify CI/CD' },
-  { cat: 'DNS & SSL',      tech: 'Netlify DNS + Let\'s Encrypt' },
-  { cat: 'SEO',            tech: 'React Helmet + Schema.org' },
-  { cat: 'Social Meta',    tech: 'Open Graph + Twitter Cards' },
-  { cat: 'Version Control','tech': 'GitHub' },
-];
+        {/* Open Graph */}
+        <meta property="og:type" content="article" />
+        <meta property="og:url" content={PAGE_URL} />
+        <meta
+          property="og:title"
+          content="AeroAdix — Production ecommerce + owner-operated CMS"
+        />
+        <meta
+          property="og:description"
+          content="React + Vite ecommerce, Supabase-powered CMS, Stripe checkout. Owner-operated end to end. Built by VVV Digitals."
+        />
+        <meta property="og:image" content={OG_IMAGE} />
+        <meta property="og:image:width" content="1200" />
+        <meta property="og:image:height" content="630" />
+        <meta property="og:site_name" content="VVV Digitals" />
 
-// ─── AeroAdix Case Study Page ─────────────────────────────────────────────────
-const AeroAdix = () => {
-  const sx = { maxWidth: 1200, margin: '0 auto', padding: '0 32px' };
+        {/* Twitter */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta
+          name="twitter:title"
+          content="AeroAdix — Case Study · VVV Digitals"
+        />
+        <meta
+          name="twitter:description"
+          content="Production ecommerce + owner-operated CMS. Built in ten weeks. End to end."
+        />
+        <meta name="twitter:image" content={OG_IMAGE} />
 
-  return (
-    <div style={{ minHeight: '100vh', background: BG, color: TXT, fontFamily: SANS }}>
+        {/* Structured data */}
+        <script type="application/ld+json">{JSON.stringify(jsonLd)}</script>
+
+        {/* Fonts */}
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link
+          rel="preconnect"
+          href="https://fonts.gstatic.com"
+          crossOrigin="anonymous"
+        />
+        <link
+          href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap"
+          rel="stylesheet"
+        />
+      </Helmet>
+
       <style>{`
-        * { box-sizing: border-box; margin: 0; }
-        html { scroll-behavior: smooth; }
-        ::selection { background: ${ACC}; color: #fff; }
-        @media (max-width: 768px) {
-          .cs-split { grid-template-columns: 1fr !important; gap: 48px !important; }
-          .cs-highlights { grid-template-columns: 1fr !important; }
-          .cs-stack { grid-template-columns: 1fr 1fr !important; }
-          .cs-hero-meta { flex-direction: column !important; gap: 24px !important; }
-          .cs-hero-title { font-size: clamp(64px, 18vw, 120px) !important; }
+        /* ============ AeroAdix Case Study — Scoped Styles ============ */
+        .aa-cs {
+          --aa-blue-deep: #184EA7;
+          --aa-blue-bright: #2B64D8;
+          --aa-black: #000000;
+          --aa-canvas: #050608;
+          --aa-surface: #0C0E12;
+          --aa-surface-2: #15181E;
+          --aa-silver: #B9BCC1;
+          --aa-dark-gray: #484A4E;
+          --aa-off-white: #EDEDEE;
+          --aa-rule: rgba(185, 188, 193, 0.12);
+          --aa-rule-strong: rgba(185, 188, 193, 0.24);
+          --aa-font-display: 'Geist', system-ui, sans-serif;
+          --aa-font-body: 'Inter', system-ui, sans-serif;
+          --aa-font-mono: 'JetBrains Mono', ui-monospace, monospace;
+          --aa-max: 1280px;
+          --aa-pad: clamp(1.25rem, 4vw, 3.5rem);
+
+          background: var(--aa-canvas);
+          color: var(--aa-off-white);
+          font-family: var(--aa-font-body);
+          font-weight: 400;
+          line-height: 1.55;
+          -webkit-font-smoothing: antialiased;
+          text-rendering: optimizeLegibility;
+          display: block;
+          width: 100%;
+          overflow-x: hidden;
+        }
+        .aa-cs *, .aa-cs *::before, .aa-cs *::after { box-sizing: border-box; }
+        .aa-cs ::selection { background: var(--aa-blue-bright); color: var(--aa-off-white); }
+        .aa-cs a { color: inherit; text-decoration: none; }
+
+        .aa-cs .wrap {
+          max-width: var(--aa-max);
+          margin: 0 auto;
+          padding-left: var(--aa-pad);
+          padding-right: var(--aa-pad);
+        }
+        .aa-cs .wrap-wide {
+          max-width: 1480px;
+          margin: 0 auto;
+          padding-left: var(--aa-pad);
+          padding-right: var(--aa-pad);
+        }
+
+        .aa-cs .eyebrow {
+          font-family: var(--aa-font-mono);
+          font-size: 0.72rem;
+          letter-spacing: 0.18em;
+          text-transform: uppercase;
+          color: var(--aa-silver);
+          font-weight: 500;
+        }
+        .aa-cs .eyebrow .dot {
+          display: inline-block;
+          width: 6px; height: 6px;
+          background: var(--aa-blue-bright);
+          border-radius: 50%;
+          margin: 0 0.65em 0.1em 0;
+          vertical-align: middle;
+        }
+
+        /* Breadcrumb */
+        .aa-cs .crumb {
+          padding: 1.5rem 0 0;
+          font-family: var(--aa-font-mono);
+          font-size: 0.72rem;
+          letter-spacing: 0.18em;
+          text-transform: uppercase;
+          color: var(--aa-silver);
+        }
+        .aa-cs .crumb a {
+          color: var(--aa-silver);
+          transition: color 0.2s ease;
+        }
+        .aa-cs .crumb a:hover { color: var(--aa-off-white); }
+        .aa-cs .crumb .sep { margin: 0 0.6em; opacity: 0.5; }
+        .aa-cs .crumb .current { color: var(--aa-off-white); }
+
+        /* HERO */
+        .aa-cs .hero {
+          padding: clamp(2.5rem, 7vw, 5rem) 0 clamp(2.5rem, 6vw, 4.5rem);
+          position: relative;
+          overflow: hidden;
+        }
+        .aa-cs .hero::before {
+          content: "";
+          position: absolute;
+          top: -10%; right: -10%;
+          width: 60vw; height: 60vw;
+          background: radial-gradient(circle at center, rgba(43, 100, 216, 0.18) 0%, transparent 60%);
+          pointer-events: none;
+          filter: blur(20px);
+        }
+        .aa-cs .hero::after {
+          content: "";
+          position: absolute;
+          inset: 0;
+          background-image:
+            linear-gradient(rgba(185,188,193,0.04) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(185,188,193,0.04) 1px, transparent 1px);
+          background-size: 80px 80px;
+          pointer-events: none;
+          mask-image: linear-gradient(180deg, transparent 0%, black 25%, black 75%, transparent 100%);
+          -webkit-mask-image: linear-gradient(180deg, transparent 0%, black 25%, black 75%, transparent 100%);
+        }
+        .aa-cs .hero .wrap { position: relative; z-index: 1; }
+
+        .aa-cs .hero-eyebrow-row {
+          display: flex; gap: 1.5rem; align-items: center; flex-wrap: wrap;
+          margin-bottom: 2.5rem;
+          opacity: 0;
+          animation: aa-fade-up 0.7s 0.1s ease forwards;
+        }
+        .aa-cs .hero-eyebrow-row .div { width: 1px; height: 12px; background: var(--aa-dark-gray); }
+
+        .aa-cs .hero h1 {
+          font-family: var(--aa-font-display);
+          font-weight: 800;
+          font-size: clamp(3rem, 11vw, 9.5rem);
+          line-height: 0.92;
+          letter-spacing: -0.04em;
+          margin: 0 0 0.4em;
+          opacity: 0;
+          animation: aa-fade-up 0.9s 0.2s ease forwards;
+        }
+        .aa-cs .hero h1 .aero { color: var(--aa-silver); font-weight: 600; }
+        .aa-cs .hero h1 .dot-mark { color: var(--aa-blue-bright); margin: 0 0.04em; }
+        .aa-cs .hero h1 .adix { color: var(--aa-off-white); font-weight: 800; }
+
+        .aa-cs .hero-sub {
+          font-family: var(--aa-font-display);
+          font-weight: 400;
+          font-size: clamp(1.15rem, 2vw, 1.5rem);
+          line-height: 1.4;
+          color: var(--aa-silver);
+          max-width: 38ch;
+          margin: 0 0 2.5rem;
+          opacity: 0;
+          animation: aa-fade-up 0.9s 0.35s ease forwards;
+        }
+
+        .aa-cs .hero-meta {
+          display: flex; gap: 2rem; flex-wrap: wrap;
+          font-family: var(--aa-font-mono);
+          font-size: 0.78rem;
+          letter-spacing: 0.08em;
+          color: var(--aa-silver);
+          opacity: 0;
+          animation: aa-fade-up 0.9s 0.5s ease forwards;
+        }
+        .aa-cs .hero-meta a {
+          color: var(--aa-blue-bright);
+          border-bottom: 1px solid currentColor;
+          padding-bottom: 2px;
+          transition: color 0.2s ease;
+        }
+        .aa-cs .hero-meta a:hover { color: var(--aa-off-white); }
+
+        /* Ticker */
+        .aa-cs .ticker {
+          border-top: 1px solid var(--aa-rule-strong);
+          border-bottom: 1px solid var(--aa-rule-strong);
+          padding: 2rem 0;
+          background: var(--aa-black);
+        }
+        .aa-cs .ticker .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0; }
+        .aa-cs .ticker .cell { padding: 0 1.5rem; border-right: 1px solid var(--aa-rule); }
+        .aa-cs .ticker .cell:last-child { border-right: none; }
+        .aa-cs .ticker .cell:first-child { padding-left: 0; }
+        .aa-cs .ticker .num {
+          font-family: var(--aa-font-display);
+          font-weight: 700;
+          font-size: clamp(2rem, 4.5vw, 3.25rem);
+          line-height: 1;
+          letter-spacing: -0.03em;
+          color: var(--aa-off-white);
+          margin-bottom: 0.5rem;
+        }
+        .aa-cs .ticker .label {
+          font-family: var(--aa-font-mono);
+          font-size: 0.7rem;
+          letter-spacing: 0.18em;
+          text-transform: uppercase;
+          color: var(--aa-silver);
+        }
+        @media (max-width: 720px) {
+          .aa-cs .ticker .grid { grid-template-columns: repeat(2, 1fr); row-gap: 2rem; }
+          .aa-cs .ticker .cell:nth-child(2) { border-right: none; }
+          .aa-cs .ticker .cell:nth-child(3) { padding-left: 0; }
+        }
+
+        .aa-cs section { padding: clamp(3.5rem, 7vw, 6rem) 0; }
+        .aa-cs section.tight { padding: clamp(2rem, 4vw, 3.5rem) 0; }
+
+        .aa-cs .section-head {
+          display: grid;
+          grid-template-columns: 1fr 2fr;
+          gap: clamp(2rem, 6vw, 5rem);
+          margin-bottom: 3.5rem;
+          align-items: start;
+        }
+        @media (max-width: 880px) {
+          .aa-cs .section-head { grid-template-columns: 1fr; gap: 1.5rem; }
+        }
+
+        .aa-cs .section-head .lead h2 {
+          font-family: var(--aa-font-display);
+          font-size: clamp(2rem, 4.5vw, 3.5rem);
+          font-weight: 700;
+          line-height: 1.05;
+          letter-spacing: -0.025em;
+          margin: 1rem 0 0;
+          color: var(--aa-off-white);
+        }
+        .aa-cs .section-head .body p {
+          font-size: 1.05rem;
+          line-height: 1.7;
+          color: var(--aa-silver);
+          margin: 0;
+          max-width: 60ch;
+        }
+        .aa-cs .section-head .body p + p { margin-top: 1.25em; }
+        .aa-cs .section-head .body strong { color: var(--aa-off-white); font-weight: 500; }
+
+        /* Brief */
+        .aa-cs .brief {
+          background: var(--aa-black);
+          border-top: 1px solid var(--aa-rule);
+          border-bottom: 1px solid var(--aa-rule);
+        }
+        .aa-cs .brief blockquote {
+          font-family: var(--aa-font-display);
+          font-size: clamp(1.5rem, 3vw, 2.4rem);
+          line-height: 1.25;
+          font-weight: 500;
+          letter-spacing: -0.015em;
+          color: var(--aa-off-white);
+          max-width: 28ch;
+          margin: 0 auto;
+          text-align: center;
+          padding: clamp(2rem, 4vw, 3rem) 0;
+          position: relative;
+        }
+        .aa-cs .brief blockquote::before, .aa-cs .brief blockquote::after {
+          content: "";
+          display: block;
+          width: 40px; height: 1px;
+          background: var(--aa-blue-bright);
+          margin: 0 auto 2rem;
+        }
+        .aa-cs .brief blockquote::after { margin: 2rem auto 0; }
+        .aa-cs .brief blockquote em { font-style: normal; color: var(--aa-blue-bright); }
+
+        /* Phase */
+        .aa-cs .phase + .phase { border-top: 1px solid var(--aa-rule); }
+        .aa-cs .phase-meta { display: flex; gap: 1rem; align-items: center; margin-bottom: 0.5rem; }
+        .aa-cs .phase-num {
+          font-family: var(--aa-font-mono);
+          font-size: 0.72rem;
+          letter-spacing: 0.18em;
+          color: var(--aa-blue-bright);
+          font-weight: 600;
+        }
+
+        /* Browser-framed screenshots */
+        .aa-cs .browser {
+          background: var(--aa-surface);
+          border: 1px solid var(--aa-rule-strong);
+          border-radius: 6px;
+          overflow: hidden;
+          box-shadow:
+            0 1px 0 rgba(255,255,255,0.04) inset,
+            0 25px 50px -20px rgba(0,0,0,0.7),
+            0 10px 25px -10px rgba(0,0,0,0.4);
+          transition: transform 0.4s ease, box-shadow 0.4s ease;
+        }
+        .aa-cs .browser:hover {
+          transform: translateY(-4px);
+          box-shadow:
+            0 1px 0 rgba(255,255,255,0.06) inset,
+            0 35px 60px -20px rgba(0,0,0,0.8),
+            0 15px 30px -10px rgba(43, 100, 216, 0.15);
+        }
+        .aa-cs .browser-bar {
+          background: var(--aa-surface-2);
+          padding: 0.65rem 1rem;
+          display: flex;
+          align-items: center;
+          gap: 0.85rem;
+          border-bottom: 1px solid var(--aa-rule);
+        }
+        .aa-cs .browser-dots { display: flex; gap: 0.4rem; flex-shrink: 0; }
+        .aa-cs .browser-dots span {
+          width: 9px; height: 9px;
+          border-radius: 50%;
+          background: var(--aa-dark-gray);
+        }
+        .aa-cs .browser-dots span:nth-child(1) { background: #FF5F57; }
+        .aa-cs .browser-dots span:nth-child(2) { background: #FEBC2E; }
+        .aa-cs .browser-dots span:nth-child(3) { background: #28C840; }
+        .aa-cs .browser-url {
+          flex: 1;
+          font-family: var(--aa-font-mono);
+          font-size: 0.72rem;
+          color: var(--aa-silver);
+          background: var(--aa-canvas);
+          padding: 0.4rem 0.85rem;
+          border-radius: 4px;
+          border: 1px solid var(--aa-rule);
+          text-align: center;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+        }
+        .aa-cs .browser-url .lock {
+          color: var(--aa-blue-bright);
+          margin-right: 0.5em;
+          font-size: 0.7em;
+        }
+        .aa-cs .browser-img {
+          display: block;
+          width: 100%;
+          height: auto;
+        }
+        .aa-cs .browser-img.cap-tall {
+          max-height: 640px;
+          object-fit: cover;
+          object-position: top;
+        }
+        .aa-cs .browser-img.cap-mid {
+          max-height: 520px;
+          object-fit: cover;
+          object-position: top;
+        }
+        .aa-cs .browser-caption {
+          margin-top: 0.85rem;
+          font-family: var(--aa-font-mono);
+          font-size: 0.7rem;
+          letter-spacing: 0.16em;
+          text-transform: uppercase;
+          color: var(--aa-silver);
+          display: flex;
+          justify-content: space-between;
+          gap: 1rem;
+          padding: 0 0.25rem;
+        }
+        .aa-cs .browser-caption .right { color: var(--aa-dark-gray); }
+
+        .aa-cs .shots-grid { display: grid; gap: clamp(1.25rem, 2.5vw, 2rem); margin-top: 2rem; }
+        .aa-cs .shots-grid.cols-2 { grid-template-columns: 1fr 1fr; }
+        @media (max-width: 880px) {
+          .aa-cs .shots-grid.cols-2 { grid-template-columns: 1fr; }
+        }
+        .aa-cs .shot-block { display: flex; flex-direction: column; }
+
+        /* Featured build */
+        .aa-cs .featured-build {
+          background: linear-gradient(180deg, var(--aa-canvas) 0%, var(--aa-black) 100%);
+          border-top: 1px solid var(--aa-rule);
+          border-bottom: 1px solid var(--aa-rule);
+          position: relative;
+          overflow: hidden;
+        }
+        .aa-cs .featured-build::before {
+          content: "";
+          position: absolute;
+          top: 50%; left: 50%;
+          transform: translate(-50%, -50%);
+          width: 80vw; height: 80vw;
+          background: radial-gradient(circle at center, rgba(43, 100, 216, 0.08) 0%, transparent 55%);
+          pointer-events: none;
+        }
+        .aa-cs .featured-build .wrap-wide { position: relative; }
+        .aa-cs .featured-head {
+          text-align: center;
+          margin-bottom: clamp(2.5rem, 5vw, 4rem);
+        }
+        .aa-cs .featured-head .eyebrow { display: inline-block; margin-bottom: 1rem; }
+        .aa-cs .featured-head h2 {
+          font-family: var(--aa-font-display);
+          font-size: clamp(2.5rem, 6vw, 4.5rem);
+          font-weight: 700;
+          line-height: 1.05;
+          letter-spacing: -0.03em;
+          margin: 0 0 1rem;
+          color: var(--aa-off-white);
+        }
+        .aa-cs .featured-head h2 .accent { color: var(--aa-blue-bright); }
+        .aa-cs .featured-head p {
+          color: var(--aa-silver);
+          max-width: 52ch;
+          margin: 0 auto;
+          font-size: 1.05rem;
+          line-height: 1.7;
+        }
+
+        /* Deliverables */
+        .aa-cs .deliverables {
+          list-style: none;
+          padding: 0;
+          margin: 2rem 0 0;
+          display: grid;
+          grid-template-columns: 1fr;
+          gap: 0;
+          counter-reset: aa-d;
+        }
+        .aa-cs .deliverables li {
+          padding: 1rem 0;
+          border-bottom: 1px solid var(--aa-rule);
+          display: grid;
+          grid-template-columns: 32px 1fr;
+          gap: 1rem;
+          align-items: start;
+          color: var(--aa-off-white);
+          font-size: 0.98rem;
+          line-height: 1.5;
+        }
+        .aa-cs .deliverables li::before {
+          content: counter(aa-d, decimal-leading-zero);
+          counter-increment: aa-d;
+          font-family: var(--aa-font-mono);
+          font-size: 0.7rem;
+          color: var(--aa-dark-gray);
+          padding-top: 4px;
+          letter-spacing: 0.05em;
+        }
+        .aa-cs .delivers-toggle {
+          margin-top: 2.5rem;
+          border-top: 1px solid var(--aa-rule);
+          padding-top: 2rem;
+        }
+        .aa-cs .delivers-toggle summary {
+          cursor: pointer;
+          list-style: none;
+          font-family: var(--aa-font-mono);
+          font-size: 0.72rem;
+          letter-spacing: 0.18em;
+          text-transform: uppercase;
+          color: var(--aa-silver);
+          padding: 0.5rem 0;
+          transition: color 0.2s ease;
+        }
+        .aa-cs .delivers-toggle summary::-webkit-details-marker { display: none; }
+        .aa-cs .delivers-toggle summary::after {
+          content: "+";
+          margin-left: 0.6em;
+          color: var(--aa-blue-bright);
+          font-weight: 600;
+        }
+        .aa-cs .delivers-toggle[open] summary::after { content: "−"; }
+        .aa-cs .delivers-toggle summary:hover { color: var(--aa-off-white); }
+
+        /* Stack */
+        .aa-cs .stack {
+          background: var(--aa-black);
+          border-top: 1px solid var(--aa-rule);
+          border-bottom: 1px solid var(--aa-rule);
+        }
+        .aa-cs .stack-table { width: 100%; border-collapse: collapse; margin-top: 2rem; }
+        .aa-cs .stack-table th, .aa-cs .stack-table td {
+          text-align: left;
+          padding: 1rem 0;
+          border-bottom: 1px solid var(--aa-rule);
+          vertical-align: top;
+        }
+        .aa-cs .stack-table th {
+          font-family: var(--aa-font-mono);
+          font-size: 0.7rem;
+          letter-spacing: 0.18em;
+          text-transform: uppercase;
+          color: var(--aa-silver);
+          font-weight: 500;
+          width: 28%;
+          padding-right: 2rem;
+        }
+        .aa-cs .stack-table td { color: var(--aa-off-white); font-size: 0.98rem; }
+        .aa-cs .stack-table td .pill {
+          display: inline-block;
+          font-family: var(--aa-font-mono);
+          font-size: 0.78rem;
+          color: var(--aa-blue-bright);
+          border: 1px solid rgba(43, 100, 216, 0.3);
+          padding: 0.2em 0.7em;
+          border-radius: 999px;
+          margin: 0.15em 0.4em 0.15em 0;
+        }
+
+        /* Outcome */
+        .aa-cs .outcome-grid {
+          display: grid;
+          grid-template-columns: repeat(3, 1fr);
+          gap: 1px;
+          background: var(--aa-rule);
+          border: 1px solid var(--aa-rule);
+          margin-top: 1rem;
+        }
+        @media (max-width: 880px) { .aa-cs .outcome-grid { grid-template-columns: 1fr; } }
+        .aa-cs .outcome-cell { background: var(--aa-canvas); padding: 2rem; }
+        .aa-cs .outcome-cell .num {
+          font-family: var(--aa-font-mono);
+          font-size: 0.72rem;
+          color: var(--aa-blue-bright);
+          letter-spacing: 0.18em;
+          margin-bottom: 0.75rem;
+          font-weight: 500;
+        }
+        .aa-cs .outcome-cell h3 {
+          font-family: var(--aa-font-display);
+          font-size: 1.2rem;
+          font-weight: 600;
+          color: var(--aa-off-white);
+          margin: 0 0 0.5rem;
+          letter-spacing: -0.01em;
+        }
+        .aa-cs .outcome-cell p {
+          color: var(--aa-silver);
+          font-size: 0.92rem;
+          line-height: 1.55;
+          margin: 0;
+        }
+
+        /* Live link strip */
+        .aa-cs .live-strip {
+          background: linear-gradient(135deg, var(--aa-blue-deep) 0%, var(--aa-blue-bright) 100%);
+          padding: clamp(2.5rem, 5vw, 4rem) 0;
+          position: relative;
+          overflow: hidden;
+        }
+        .aa-cs .live-strip::before {
+          content: "";
+          position: absolute;
+          inset: 0;
+          background-image: linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px);
+          background-size: 100% 32px;
+          pointer-events: none;
+        }
+        .aa-cs .live-strip .row {
+          display: flex; justify-content: space-between; align-items: center; gap: 2rem; flex-wrap: wrap;
+          position: relative;
+        }
+        .aa-cs .live-strip .label {
+          font-family: var(--aa-font-mono);
+          font-size: 0.75rem;
+          letter-spacing: 0.18em;
+          text-transform: uppercase;
+          color: rgba(255,255,255,0.7);
+          margin-bottom: 0.5rem;
+        }
+        .aa-cs .live-strip a.url {
+          font-family: var(--aa-font-display);
+          font-size: clamp(1.8rem, 4vw, 2.8rem);
+          font-weight: 700;
+          color: white;
+          letter-spacing: -0.02em;
+          display: inline-block;
+          border-bottom: 2px solid rgba(255,255,255,0.4);
+          padding-bottom: 0.15em;
+          transition: border-color 0.2s ease;
+        }
+        .aa-cs .live-strip a.url:hover { border-color: white; }
+        .aa-cs .live-strip .arrow {
+          font-family: var(--aa-font-display);
+          font-size: clamp(2.5rem, 6vw, 4rem);
+          color: rgba(255,255,255,0.5);
+          line-height: 1;
+        }
+
+        /* Credits */
+        .aa-cs .credits-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2rem; }
+        @media (max-width: 720px) { .aa-cs .credits-grid { grid-template-columns: 1fr; gap: 1.5rem; } }
+        .aa-cs .credit-block .label {
+          font-family: var(--aa-font-mono);
+          font-size: 0.7rem;
+          letter-spacing: 0.18em;
+          text-transform: uppercase;
+          color: var(--aa-silver);
+          margin-bottom: 0.75rem;
+          font-weight: 500;
+        }
+        .aa-cs .credit-block .value {
+          font-family: var(--aa-font-display);
+          font-size: 1rem;
+          color: var(--aa-off-white);
+          font-weight: 500;
+          line-height: 1.4;
+        }
+        .aa-cs .credit-block .value small {
+          display: block;
+          font-family: var(--aa-font-body);
+          font-size: 0.85rem;
+          color: var(--aa-silver);
+          font-weight: 400;
+          margin-top: 0.3em;
+        }
+
+        /* CTA — closing */
+        .aa-cs .cta {
+          background: var(--aa-black);
+          border-top: 1px solid var(--aa-rule);
+          padding: clamp(4rem, 8vw, 7rem) 0;
+        }
+        .aa-cs .cta-head {
+          text-align: center;
+          margin-bottom: clamp(2.5rem, 5vw, 4rem);
+        }
+        .aa-cs .cta-head .eyebrow { display: inline-block; margin-bottom: 1rem; }
+        .aa-cs .cta-head h2 {
+          font-family: var(--aa-font-display);
+          font-size: clamp(2rem, 4.5vw, 3.25rem);
+          font-weight: 700;
+          line-height: 1.1;
+          letter-spacing: -0.025em;
+          margin: 0;
+          color: var(--aa-off-white);
+        }
+        .aa-cs .cta-head h2 .accent { color: var(--aa-blue-bright); }
+        .aa-cs .cta-grid {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 1px;
+          background: var(--aa-rule-strong);
+          border: 1px solid var(--aa-rule-strong);
+        }
+        @media (max-width: 720px) { .aa-cs .cta-grid { grid-template-columns: 1fr; } }
+        .aa-cs .cta-card {
+          background: var(--aa-canvas);
+          padding: clamp(2rem, 4vw, 3rem);
+          display: flex;
+          flex-direction: column;
+          gap: 1rem;
+          transition: background 0.3s ease;
+          position: relative;
+          color: var(--aa-off-white);
+        }
+        .aa-cs .cta-card:hover {
+          background: var(--aa-surface-2);
+        }
+        .aa-cs .cta-card .label {
+          font-family: var(--aa-font-mono);
+          font-size: 0.72rem;
+          letter-spacing: 0.18em;
+          text-transform: uppercase;
+          color: var(--aa-blue-bright);
+          font-weight: 600;
+        }
+        .aa-cs .cta-card h3 {
+          font-family: var(--aa-font-display);
+          font-size: clamp(1.5rem, 2.5vw, 2rem);
+          font-weight: 700;
+          line-height: 1.15;
+          letter-spacing: -0.02em;
+          margin: 0;
+          color: var(--aa-off-white);
+        }
+        .aa-cs .cta-card p {
+          color: var(--aa-silver);
+          font-size: 1rem;
+          line-height: 1.6;
+          margin: 0;
+          max-width: 40ch;
+        }
+        .aa-cs .cta-card .arrow {
+          margin-top: auto;
+          padding-top: 1.5rem;
+          font-family: var(--aa-font-display);
+          font-size: 1rem;
+          font-weight: 600;
+          color: var(--aa-blue-bright);
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+          transition: gap 0.2s ease, color 0.2s ease;
+        }
+        .aa-cs .cta-card:hover .arrow {
+          gap: 0.85rem;
+          color: var(--aa-off-white);
+        }
+        .aa-cs .cta-card .arrow span:last-child {
+          font-size: 1.2em;
+          line-height: 0;
+        }
+
+        /* Animations */
+        @keyframes aa-fade-up {
+          from { opacity: 0; transform: translateY(14px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .aa-cs *, .aa-cs *::before, .aa-cs *::after {
+            animation-duration: 0.01ms !important;
+            animation-iteration-count: 1 !important;
+            transition-duration: 0.01ms !important;
+          }
         }
       `}</style>
 
-      <Nav />
+      <article className="aa-cs">
+        {/* Breadcrumb */}
+        <div className="wrap">
+          <nav className="crumb" aria-label="Breadcrumb">
+            <Link to="/">Home</Link>
+            <span className="sep">/</span>
+            <Link to="/work">Work</Link>
+            <span className="sep">/</span>
+            <span className="current">AeroAdix</span>
+          </nav>
+        </div>
 
-      {/* ── HERO ── */}
-      <section style={{ padding: '100px 0 80px', borderBottom: `1px solid ${BDR}` }}>
-        <div style={sx}>
-          <motion.div
-            initial={{ opacity: 0, y: 24 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
-          >
-            <Label>Case Study — 001</Label>
+        {/* Hero */}
+        <header className="hero">
+          <div className="wrap">
+            <div className="hero-eyebrow-row">
+              <span className="eyebrow">
+                <span className="dot"></span>Case Study · 2026
+              </span>
+              <span className="div"></span>
+              <span className="eyebrow">Ecommerce + CMS · Phase 1+2 · Final</span>
+            </div>
 
-            {/* Split title treatment: AERO solid, ADIX outlined */}
-            <h1
-              className="cs-hero-title"
-              style={{
-                fontFamily: HEAD,
-                fontSize: 'clamp(80px, 13vw, 160px)',
-                lineHeight: 0.88,
-                letterSpacing: '0.02em',
-                marginBottom: 36,
-              }}
-            >
-              <span style={{ color: TXT }}>AERO</span>
-              <span style={{
-                color: 'transparent',
-                WebkitTextStroke: `1px ${ACC}`,
-              }}>ADIX</span>
+            <h1>
+              <span className="aero">AERO</span>
+              <span className="dot-mark">·</span>
+              <span className="adix">ADIX</span>
             </h1>
 
-            <p style={{
-              fontSize: 16, lineHeight: 1.8,
-              color: '#6b7f99', maxWidth: 540, marginBottom: 52,
-            }}>
-              Brand identity, custom React platform, and full technical deployment
-              for a performance automotive aerodynamics startup — built from zero
-              to live in under two weeks.
+            <p className="hero-sub">
+              A production-grade ecommerce site and owner-operated CMS for a
+              CFD-engineered, 3D-printed aerodynamics brand. Built end-to-end in ten weeks.
             </p>
 
-            {/* Meta row */}
-            <div
-              className="cs-hero-meta"
-              style={{ display: 'flex', gap: 48, flexWrap: 'wrap' }}
-            >
-              {[
-                { label: 'Client',    value: meta.client },
-                { label: 'Timeline',  value: meta.timeline },
-                { label: 'Location',  value: meta.location },
-              ].map(({ label, value }) => (
-                <div key={label}>
-                  <div style={{ fontFamily: MONO, fontSize: 9, letterSpacing: '0.2em', textTransform: 'uppercase', color: MID, marginBottom: 6 }}>{label}</div>
-                  <div style={{ fontSize: 14, fontWeight: 500, color: TXT }}>{value}</div>
+            <div className="hero-meta">
+              <span>VVV DIGITALS · BRIT, DIRECTOR OF DIGITAL OPERATIONS</span>
+              <a href="https://aeroadix.com" target="_blank" rel="noopener noreferrer">
+                aeroadix.com →
+              </a>
+            </div>
+          </div>
+        </header>
+
+        {/* Ticker */}
+        <section className="ticker tight" aria-label="Engagement at a glance">
+          <div className="wrap">
+            <div className="grid">
+              <div className="cell">
+                <div className="num">10</div>
+                <div className="label">Active Weeks</div>
+              </div>
+              <div className="cell">
+                <div className="num">02</div>
+                <div className="label">Phases Delivered</div>
+              </div>
+              <div className="cell">
+                <div className="num">04</div>
+                <div className="label">Vehicle Platforms</div>
+              </div>
+              <div className="cell">
+                <div className="num">
+                  9<span style={{ color: 'var(--aa-blue-bright)' }}>+</span>6
                 </div>
-              ))}
-              <div>
-                <div style={{ fontFamily: MONO, fontSize: 9, letterSpacing: '0.2em', textTransform: 'uppercase', color: MID, marginBottom: 6 }}>Live Site</div>
-                <a
-                  href={meta.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  style={{
-                    display: 'inline-flex', alignItems: 'center', gap: 8,
-                    fontFamily: MONO, fontSize: 11, letterSpacing: '0.12em',
-                    textTransform: 'uppercase', color: ACC,
-                    textDecoration: 'none',
-                  }}
-                >
-                  <span style={{
-                    width: 6, height: 6, borderRadius: '50%',
-                    background: '#22c55e',
-                    animation: 'pulse 2s infinite',
-                  }} />
-                  aeroadix.com
-                </a>
+                <div className="label">Public + Admin Routes</div>
               </div>
             </div>
-          </motion.div>
-        </div>
-      </section>
-
-      {/* ── BRIEF + PROBLEM ── */}
-      <section style={{ padding: '80px 0' }}>
-        <div style={sx}>
-          <div
-            className="cs-split"
-            style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 80 }}
-          >
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: '-60px' }}
-              transition={{ duration: 0.6 }}
-            >
-              <Label>The Brief</Label>
-              <h2 style={{ fontFamily: HEAD, fontSize: 'clamp(36px, 5vw, 56px)', color: TXT, letterSpacing: '0.03em', marginBottom: 24, lineHeight: 1 }}>
-                A CONCEPT WITHOUT A PRESENCE
-              </h2>
-              <p style={{ fontSize: 15, lineHeight: 1.85, color: '#6b7f99' }}>
-                AeroAdix arrived as an engineering vision with no digital presence,
-                no brand language, and no way to communicate the technical
-                sophistication of their process to a market full of skeptical
-                enthusiasts.
-              </p>
-              <p style={{ fontSize: 15, lineHeight: 1.85, color: '#6b7f99', marginTop: 16 }}>
-                The ask: build something that looked and felt like it belonged next
-                to the OEM brands they were competing with — and do it fast.
-              </p>
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: '-60px' }}
-              transition={{ duration: 0.6, delay: 0.1 }}
-            >
-              <Label>The Problem</Label>
-              <h2 style={{ fontFamily: HEAD, fontSize: 'clamp(36px, 5vw, 56px)', color: TXT, letterSpacing: '0.03em', marginBottom: 24, lineHeight: 1 }}>
-                NOISE IN A CROWDED MARKET
-              </h2>
-              <p style={{ fontSize: 15, lineHeight: 1.85, color: '#6b7f99' }}>
-                The performance automotive aftermarket is saturated with cheap
-                cosmetic parts and hollow branding. AeroAdix's differentiator —
-                every component 3D-scanned, CFD-simulated, and precision printed —
-                was genuinely technical and genuinely different.
-              </p>
-              <p style={{ fontSize: 15, lineHeight: 1.85, color: '#6b7f99', marginTop: 16 }}>
-                Without the right language and presentation, it would read the same
-                as everyone else.
-              </p>
-            </motion.div>
           </div>
-        </div>
-      </section>
+        </section>
 
-      <Divider />
-
-      {/* ── HIGHLIGHTS ── */}
-      <section style={{ padding: '80px 0' }}>
-        <div style={sx}>
-          <Label>By the Numbers</Label>
-          <div
-            className="cs-highlights"
-            style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 2, background: BDR, border: `1px solid ${BDR}` }}
-          >
-            {[
-              { num: '01', label: 'Developer. Zero Team.', desc: 'Every line of code, every pixel, every word. No agency. No templates. No shortcuts.' },
-              { num: '14', label: 'Days to Production', desc: 'Blank repo to live deployment on custom DNS — CI/CD pipeline, SSL, SEO infrastructure.' },
-              { num: '06', label: 'Disciplines Delivered', desc: 'Brand identity, development, copywriting, DevOps, SEO, and project management — all in scope.' },
-            ].map(({ num, label, desc }, i) => (
-              <motion.div
-                key={num}
-                initial={{ opacity: 0, y: 16 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: i * 0.1 }}
-                style={{ background: BGC, padding: '40px 32px' }}
-              >
-                <div style={{ fontFamily: HEAD, fontSize: 64, color: ACC, opacity: 0.5, lineHeight: 1, marginBottom: 12 }}>{num}</div>
-                <div style={{ fontSize: 13, fontWeight: 600, color: TXT, marginBottom: 8 }}>{label}</div>
-                <div style={{ fontSize: 13, lineHeight: 1.65, color: MID }}>{desc}</div>
-              </motion.div>
-            ))}
+        {/* The Brief */}
+        <section className="brief">
+          <div className="wrap">
+            <span
+              className="eyebrow"
+              style={{ display: 'block', textAlign: 'center', marginBottom: '0.5rem' }}
+            >
+              <span className="dot"></span>The Brief
+            </span>
+            <blockquote>
+              Build a production-grade ecommerce site for a CFD-engineered aerodynamics brand.{' '}
+              <em>Make it ownable. Make it self-serve.</em>
+            </blockquote>
           </div>
-        </div>
-      </section>
+        </section>
 
-      <Divider />
-
-      {/* ── THE BUILD ── */}
-      <section style={{ padding: '80px 0' }}>
-        <div style={sx}>
-          <Label>The Build</Label>
-          <div
-            className="cs-split"
-            style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 80, marginBottom: 56 }}
-          >
-            <div>
-              <h2 style={{ fontFamily: HEAD, fontSize: 'clamp(36px, 5vw, 56px)', color: TXT, letterSpacing: '0.03em', marginBottom: 24, lineHeight: 1 }}>
-                WHAT WE BUILT
-              </h2>
-              <p style={{ fontSize: 15, lineHeight: 1.85, color: '#6b7f99', marginBottom: 16 }}>
-                A full custom React SPA — no templates, no WordPress, no shortcuts.
-                Built from scratch with Vite, Tailwind CSS, and Framer Motion with
-                interactive components, custom animations, and a responsive layout
-                engineered for both desktop and mobile.
-              </p>
-              <p style={{ fontSize: 15, lineHeight: 1.85, color: '#6b7f99', marginBottom: 16 }}>
-                The brand work ran parallel to the build. The AeroAdix logo and the
-                M.A.S.T. concept — Motorsports Aerodynamics Surface Technologies —
-                was developed as the brand's technical identity framework and woven
-                throughout the site's structure and copy.
-              </p>
-              <p style={{ fontSize: 15, lineHeight: 1.85, color: '#6b7f99' }}>
-                The CFD process section required technically accurate content about
-                computational fluid dynamics — Navier-Stokes, pressure mapping,
-                boundary layer simulation. Researched, written, and structured for
-                both technical and general audiences.
-              </p>
+        {/* Phase 1 */}
+        <section className="phase">
+          <div className="wrap-wide">
+            <div className="section-head">
+              <div className="lead">
+                <div className="phase-meta">
+                  <span className="phase-num">PHASE 01</span>
+                  <span className="eyebrow">Delivered Apr 24, 2026</span>
+                </div>
+                <h2>The Site.</h2>
+              </div>
+              <div className="body">
+                <p>
+                  A custom React + Vite single-page application with nine public routes —
+                  homepage, shop, category, product detail, cart, checkout, order
+                  confirmation, contact, and a custom 404. Branded from logo system through
+                  to social card.
+                </p>
+                <p>
+                  Stripe checkout via a serverless Netlify Function.{' '}
+                  <strong>WCAG 2.1 AA accessibility audit and remediation.</strong>{' '}
+                  Forty-eight product photographs processed and a full SEO launch kit
+                  shipped — sitemap, robots, meta, Open Graph, font preloading, lazy
+                  loading, WebP pipeline.
+                </p>
+              </div>
             </div>
 
-            {/* Stack grid */}
-            <div>
-              <div style={{ fontFamily: MONO, fontSize: 10, letterSpacing: '0.2em', textTransform: 'uppercase', color: MID, marginBottom: 20 }}>Tech Stack</div>
-              <div
-                className="cs-stack"
-                style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 1, background: BDR, border: `1px solid ${BDR}` }}
-              >
-                {stackItems.map(({ cat, tech }) => (
-                  <div key={cat} style={{ background: BGC, padding: '16px 20px' }}>
-                    <div style={{ fontFamily: MONO, fontSize: 9, letterSpacing: '0.18em', textTransform: 'uppercase', color: ACC, marginBottom: 6 }}>{cat}</div>
-                    <div style={{ fontSize: 13, fontWeight: 500, color: TXT }}>{tech}</div>
+            {/* Homepage hero */}
+            <div className="shot-block">
+              <div className="browser">
+                <div className="browser-bar">
+                  <div className="browser-dots">
+                    <span></span>
+                    <span></span>
+                    <span></span>
                   </div>
-                ))}
+                  <div className="browser-url">
+                    <span className="lock">🔒</span>aeroadix.com
+                  </div>
+                </div>
+                <img
+                  src={`${SHOTS}/01-homepage-full.png`}
+                  alt="AeroAdix homepage — top fold showing the rotating product carousel, M.A.S.T. concept tagline, and four-platform vehicle selector"
+                  className="browser-img cap-tall"
+                  loading="lazy"
+                />
+              </div>
+              <div className="browser-caption">
+                <span>01 · Homepage</span>
+                <span className="right">/</span>
+              </div>
+            </div>
+
+            {/* 2x2 grid */}
+            <div className="shots-grid cols-2">
+              <div className="shot-block">
+                <div className="browser">
+                  <div className="browser-bar">
+                    <div className="browser-dots">
+                      <span></span>
+                      <span></span>
+                      <span></span>
+                    </div>
+                    <div className="browser-url">
+                      <span className="lock">🔒</span>aeroadix.com/shop
+                    </div>
+                  </div>
+                  <img
+                    src={`${SHOTS}/03-shop.png`}
+                    alt="AeroAdix shop catalog — four vehicle platform tiles for Focus RS, GTR R35, BMW E90/E92, and Subaru STI"
+                    className="browser-img"
+                    loading="lazy"
+                  />
+                </div>
+                <div className="browser-caption">
+                  <span>02 · Shop catalog</span>
+                  <span className="right">/shop</span>
+                </div>
+              </div>
+
+              <div className="shot-block">
+                <div className="browser">
+                  <div className="browser-bar">
+                    <div className="browser-dots">
+                      <span></span>
+                      <span></span>
+                      <span></span>
+                    </div>
+                    <div className="browser-url">
+                      <span className="lock">🔒</span>aeroadix.com/shop/category/subaru-sti
+                    </div>
+                  </div>
+                  <img
+                    src={`${SHOTS}/04-sti-category.png`}
+                    alt="STI category page — full Aero-RS system available as a bundle or individual pieces"
+                    className="browser-img"
+                    loading="lazy"
+                  />
+                </div>
+                <div className="browser-caption">
+                  <span>03 · STI category</span>
+                  <span className="right">/shop/category/:slug</span>
+                </div>
+              </div>
+
+              <div className="shot-block">
+                <div className="browser">
+                  <div className="browser-bar">
+                    <div className="browser-dots">
+                      <span></span>
+                      <span></span>
+                      <span></span>
+                    </div>
+                    <div className="browser-url">
+                      <span className="lock">🔒</span>aeroadix.com/shop/focus-rs-canard-kit
+                    </div>
+                  </div>
+                  <img
+                    src={`${SHOTS}/05-product-focus.png`}
+                    alt="Focus RS Canard Kit product detail — multi-image gallery, specs table, package breakdown"
+                    className="browser-img cap-mid"
+                    loading="lazy"
+                  />
+                </div>
+                <div className="browser-caption">
+                  <span>04 · Product detail · Focus RS</span>
+                  <span className="right">/shop/:productId</span>
+                </div>
+              </div>
+
+              <div className="shot-block">
+                <div className="browser">
+                  <div className="browser-bar">
+                    <div className="browser-dots">
+                      <span></span>
+                      <span></span>
+                      <span></span>
+                    </div>
+                    <div className="browser-url">
+                      <span className="lock">🔒</span>aeroadix.com/contact
+                    </div>
+                  </div>
+                  <img
+                    src={`${SHOTS}/02-contact.png`}
+                    alt="Contact page — Netlify Forms wired with honeypot spam protection"
+                    className="browser-img"
+                    loading="lazy"
+                  />
+                </div>
+                <div className="browser-caption">
+                  <span>05 · Contact</span>
+                  <span className="right">/contact</span>
+                </div>
+              </div>
+            </div>
+
+            <details className="delivers-toggle">
+              <summary>Phase 01 deliverables · expand</summary>
+              <ol className="deliverables">
+                <li>
+                  Brand identity — logo system (SVG master, PNG variants, favicon set),
+                  social card, Open Graph creative
+                </li>
+                <li>
+                  Custom Vite + React + Tailwind single-page application, nine public
+                  routes
+                </li>
+                <li>
+                  Homepage — hero, engineering stack, CFD process, platform selector,
+                  About, flagship showcase, footer
+                </li>
+                <li>
+                  Shop catalog, category pages, product detail with multi-image galleries
+                </li>
+                <li>Cart context, cart page, checkout, order confirmation</li>
+                <li>Stripe integration via serverless Netlify Function</li>
+                <li>Initial product data layer — seven SKUs across four vehicle platforms</li>
+                <li>SEO launch kit, WCAG 2.1 AA accessibility audit and remediation</li>
+                <li>Product photography processing (48+ assets) and CFD imagery curation</li>
+                <li>
+                  Netlify deployment configuration with security headers, caching, SPA
+                  redirects
+                </li>
+                <li>
+                  CodeQL security workflow, clean repository hygiene, full handoff package
+                </li>
+              </ol>
+            </details>
+          </div>
+        </section>
+
+        {/* Featured Build — STI Aero-RS */}
+        <section className="featured-build">
+          <div className="wrap-wide">
+            <div className="featured-head">
+              <span className="eyebrow">
+                <span className="dot"></span>Featured Build
+              </span>
+              <h2>
+                STI <span className="accent">Aero-RS</span> Full Package
+              </h2>
+              <p>
+                The flagship product page. A bundle that surfaces the complete Aero-RS
+                aerodynamic system for the Subaru WRX STI — package savings, breakdown of
+                individual components, and cross-sells, all dynamic from the CMS.
+              </p>
+            </div>
+
+            <div className="browser" style={{ maxWidth: '1100px', margin: '0 auto' }}>
+              <div className="browser-bar">
+                <div className="browser-dots">
+                  <span></span>
+                  <span></span>
+                  <span></span>
+                </div>
+                <div className="browser-url">
+                  <span className="lock">🔒</span>
+                  aeroadix.com/shop/sti-aero-rs-full-package
+                </div>
+              </div>
+              <img
+                src={`${SHOTS}/08-package-sti.png`}
+                alt="STI Aero-RS Full Package product page — complete aerodynamic system with bundle savings, package breakdown, and related products"
+                className="browser-img"
+                loading="lazy"
+              />
+            </div>
+          </div>
+        </section>
+
+        {/* Phase 2 */}
+        <section className="phase">
+          <div className="wrap-wide">
+            <div className="section-head">
+              <div className="lead">
+                <div className="phase-meta">
+                  <span className="phase-num">PHASE 02</span>
+                  <span className="eyebrow">Delivered Apr 26, 2026</span>
+                </div>
+                <h2>The Owner Panel.</h2>
+              </div>
+              <div className="body">
+                <p>
+                  A self-serve content management system. The owner manages every product,
+                  price, photograph, and homepage carousel image through a branded admin
+                  panel — <strong>no developer involvement required.</strong>
+                </p>
+                <p>
+                  Supabase Postgres with Row Level Security. Two public Storage buckets
+                  gated to the owner email. Admin routes shielded by both a frontend route
+                  guard and database-level enforcement. Stripe checkout uses live admin
+                  prices automatically — no Stripe sync when prices change.
+                </p>
+              </div>
+            </div>
+
+            {/* Dashboard hero */}
+            <div className="shot-block">
+              <div className="browser">
+                <div className="browser-bar">
+                  <div className="browser-dots">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                  </div>
+                  <div className="browser-url">
+                    <span className="lock">🔒</span>aeroadix.com/admin
+                  </div>
+                </div>
+                <img
+                  src={`${SHOTS}/09-admin-dashboard.png`}
+                  alt="Admin dashboard — three tiles showing live counts of products, carousel images, and storage"
+                  className="browser-img"
+                  loading="lazy"
+                />
+              </div>
+              <div className="browser-caption">
+                <span>06 · Admin dashboard</span>
+                <span className="right">/admin</span>
+              </div>
+            </div>
+
+            {/* Products + Carousel */}
+            <div className="shots-grid cols-2">
+              <div className="shot-block">
+                <div className="browser">
+                  <div className="browser-bar">
+                    <div className="browser-dots">
+                      <span></span>
+                      <span></span>
+                      <span></span>
+                    </div>
+                    <div className="browser-url">
+                      <span className="lock">🔒</span>aeroadix.com/admin/products
+                    </div>
+                  </div>
+                  <img
+                    src={`${SHOTS}/10-admin-products.png`}
+                    alt="Admin products manager — full list with reorder controls, edit, delete, and featured toggles"
+                    className="browser-img"
+                    loading="lazy"
+                  />
+                </div>
+                <div className="browser-caption">
+                  <span>07 · Products manager</span>
+                  <span className="right">/admin/products</span>
+                </div>
+              </div>
+
+              <div className="shot-block">
+                <div className="browser">
+                  <div className="browser-bar">
+                    <div className="browser-dots">
+                      <span></span>
+                      <span></span>
+                      <span></span>
+                    </div>
+                    <div className="browser-url">
+                      <span className="lock">🔒</span>aeroadix.com/admin/carousel
+                    </div>
+                  </div>
+                  <img
+                    src={`${SHOTS}/11-admin-carousel.png`}
+                    alt="Admin carousel manager — drag-and-drop upload, inline label editing, reorder, replace, delete"
+                    className="browser-img"
+                    loading="lazy"
+                  />
+                </div>
+                <div className="browser-caption">
+                  <span>08 · Carousel manager</span>
+                  <span className="right">/admin/carousel</span>
+                </div>
+              </div>
+            </div>
+
+            <details className="delivers-toggle">
+              <summary>Phase 02 deliverables · expand</summary>
+              <ol className="deliverables">
+                <li>
+                  Supabase project provisioning — schema, idempotent migration script, Row
+                  Level Security policies, Storage buckets and policies
+                </li>
+                <li>
+                  One-time image migration uploading all existing site assets to Supabase
+                  Storage and rewriting database references
+                </li>
+                <li>
+                  React data layer — hooks replacing the static data file, with skeleton
+                  loading on Shop, Category, Product Detail, and homepage carousel
+                </li>
+                <li>
+                  Owner authentication — Supabase Auth integration, owner-only gating,
+                  branded login page, protected route wrapper
+                </li>
+                <li>
+                  Admin shell — bare-layout admin frame, dashboard tiles, mobile
+                  responsiveness, noindex meta on every admin page
+                </li>
+                <li>
+                  Admin products module — list with reorder, full edit form, multi-image
+                  drag-and-drop, set-thumbnail, delete-with-Storage-cleanup
+                </li>
+                <li>
+                  New-product flow with auto-generated URL slug, owner-friendly field
+                  hiding (Stripe IDs, SKUs, internal fields)
+                </li>
+                <li>
+                  Admin carousel module — list, drag-and-drop add, inline label editing,
+                  replace, delete
+                </li>
+                <li>
+                  Owner UX polish — plain-English placeholders, slug protection on
+                  existing products, intuitive sort controls
+                </li>
+                <li>
+                  Documentation — idempotent SQL setup, storage walkthrough, environment
+                  template, owner operations guide
+                </li>
+              </ol>
+            </details>
+          </div>
+        </section>
+
+        {/* Stack */}
+        <section className="stack">
+          <div className="wrap">
+            <div className="section-head">
+              <div className="lead">
+                <span className="eyebrow">
+                  <span className="dot"></span>Stack
+                </span>
+                <h2>Built on.</h2>
+              </div>
+              <div className="body">
+                <p>
+                  Modern, minimal, production-grade. Every choice is intentional — chosen
+                  for the owner to be able to live with the system long after handoff, and
+                  for the codebase to be readable by any competent React engineer.
+                </p>
+              </div>
+            </div>
+
+            <table className="stack-table">
+              <tbody>
+                <tr>
+                  <th>Framework</th>
+                  <td>
+                    <span className="pill">Vite 6</span>
+                    <span className="pill">React 18</span>
+                    <span className="pill">React Router 7</span>
+                  </td>
+                </tr>
+                <tr>
+                  <th>Styling</th>
+                  <td>
+                    <span className="pill">Tailwind CSS 3</span>
+                    <span className="pill">Framer Motion 11</span>
+                    <span className="pill">Inter (Google Fonts)</span>
+                  </td>
+                </tr>
+                <tr>
+                  <th>Database</th>
+                  <td>
+                    <span className="pill">Supabase Postgres</span>
+                    <span className="pill">Row Level Security</span>
+                  </td>
+                </tr>
+                <tr>
+                  <th>File Storage</th>
+                  <td>
+                    <span className="pill">Supabase Storage</span>
+                    <span className="pill">Two public buckets</span>
+                  </td>
+                </tr>
+                <tr>
+                  <th>Authentication</th>
+                  <td>
+                    <span className="pill">Supabase Auth</span>
+                    <span className="pill">Single owner</span>
+                  </td>
+                </tr>
+                <tr>
+                  <th>Hosting</th>
+                  <td>
+                    <span className="pill">Netlify</span>
+                    <span className="pill">Netlify Functions</span>
+                    <span className="pill">Netlify Forms</span>
+                  </td>
+                </tr>
+                <tr>
+                  <th>Payments</th>
+                  <td>
+                    <span className="pill">Stripe Checkout</span>
+                    <span className="pill">Serverless bridge</span>
+                  </td>
+                </tr>
+                <tr>
+                  <th>CI/CD &amp; Security</th>
+                  <td>
+                    <span className="pill">GitHub</span>
+                    <span className="pill">CodeQL</span>
+                    <span className="pill">Auto preview deploys</span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        {/* Outcome */}
+        <section className="phase">
+          <div className="wrap">
+            <div className="section-head">
+              <div className="lead">
+                <span className="eyebrow">
+                  <span className="dot"></span>Outcome
+                </span>
+                <h2>What shipped.</h2>
+              </div>
+              <div className="body">
+                <p>
+                  A production site indexed by Google Search Console at{' '}
+                  <strong>aeroadix.com</strong>, owner-operated end to end, with the owner
+                  able to add products, change prices, swap homepage imagery, and manage
+                  the catalog without touching code.
+                </p>
+              </div>
+            </div>
+
+            <div className="outcome-grid">
+              <div className="outcome-cell">
+                <div className="num">01</div>
+                <h3>Owner Independence</h3>
+                <p>
+                  The site owner manages every product, price, photograph, and homepage
+                  carousel image. Zero developer involvement required for ongoing
+                  operations.
+                </p>
+              </div>
+              <div className="outcome-cell">
+                <div className="num">02</div>
+                <h3>No Stripe Sync Drift</h3>
+                <p>
+                  Checkout uses live admin prices via ad-hoc{' '}
+                  <code
+                    style={{
+                      fontFamily: 'var(--aa-font-mono)',
+                      fontSize: '0.85em',
+                      color: 'var(--aa-blue-bright)',
+                    }}
+                  >
+                    price_data
+                  </code>
+                  . Change a price in the admin panel — it takes effect on the next
+                  checkout.
+                </p>
+              </div>
+              <div className="outcome-cell">
+                <div className="num">03</div>
+                <h3>Defense in Depth</h3>
+                <p>
+                  Frontend route guard plus database-level Row Level Security. Browser
+                  secrets isolated. Storage policies enforce owner-only writes. Bypass
+                  either layer and the other still holds.
+                </p>
               </div>
             </div>
           </div>
+        </section>
 
-          {/* Services tags */}
-          <div style={{ fontFamily: MONO, fontSize: 10, letterSpacing: '0.2em', textTransform: 'uppercase', color: MID, marginBottom: 16 }}>Services Delivered</div>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-            {meta.services.map(s => (
-              <span key={s} style={{
-                fontFamily: MONO, fontSize: 9, letterSpacing: '0.12em',
-                textTransform: 'uppercase', color: ACC,
-                border: `1px solid ${ACC}33`, padding: '8px 14px',
-              }}>
-                {s}
-              </span>
-            ))}
+        {/* Live link */}
+        <section className="live-strip">
+          <div className="wrap row">
+            <div>
+              <div className="label">Live Site · Production</div>
+              <a
+                href="https://aeroadix.com"
+                className="url"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                aeroadix.com
+              </a>
+            </div>
+            <div className="arrow" aria-hidden="true">
+              →
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
 
-      <Divider />
-
-      {/* ── GALLERY ── */}
-      <section style={{ padding: '80px 0' }}>
-        <div style={sx}>
-          <Label>Site Gallery</Label>
-          <h2 style={{ fontFamily: HEAD, fontSize: 'clamp(36px, 5vw, 56px)', color: TXT, letterSpacing: '0.03em', marginBottom: 8, lineHeight: 1 }}>
-            THE FINISHED PRODUCT
-          </h2>
-          <p style={{ fontSize: 15, color: '#6b7f99', maxWidth: 500 }}>
-            Every section, every interaction — built and deployed live at aeroadix.com.
-          </p>
-          <Gallery images={screenshots} />
-        </div>
-      </section>
-
-      <Divider />
-
-      {/* ── CTA ── */}
-      <section style={{ padding: '100px 0', textAlign: 'center' }}>
-        <div style={{ ...sx, maxWidth: 640 }}>
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-          >
-            <Label>Ready to Build?</Label>
-            <h2 style={{ fontFamily: HEAD, fontSize: 'clamp(48px, 8vw, 96px)', color: TXT, letterSpacing: '0.03em', lineHeight: 0.95, marginBottom: 24 }}>
-              LET'S BUILD YOURS
-            </h2>
-            <p style={{ fontSize: 15, lineHeight: 1.8, color: '#6b7f99', marginBottom: 40 }}>
-              VVV Digitals delivers full-stack digital solutions — from concept through
-              production. One point of contact. No agency markup.
-            </p>
-            <a
-              href="/#contact"
+        {/* Credits */}
+        <section className="phase">
+          <div className="wrap">
+            <span className="eyebrow">
+              <span className="dot"></span>Credits
+            </span>
+            <h2
               style={{
-                display: 'inline-block',
-                padding: '14px 44px', background: ACC, color: '#fff',
-                fontFamily: MONO, fontSize: 10, fontWeight: 700,
-                letterSpacing: '0.2em', textTransform: 'uppercase',
-                textDecoration: 'none', transition: 'background 0.2s',
+                fontFamily: 'var(--aa-font-display)',
+                fontSize: 'clamp(2rem, 4.5vw, 3.5rem)',
+                fontWeight: 700,
+                lineHeight: 1.05,
+                letterSpacing: '-0.025em',
+                margin: '1rem 0 3rem',
               }}
-              onMouseEnter={e => e.target.style.background = '#6b93fa'}
-              onMouseLeave={e => e.target.style.background = ACC}
             >
-              Start a Conversation
-            </a>
-          </motion.div>
-        </div>
-      </section>
+              Engagement record.
+            </h2>
 
-      {/* ── FOOTER ── */}
-      <footer style={{
-        borderTop: `1px solid ${BDR}`,
-        padding: '28px 32px',
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        flexWrap: 'wrap', gap: 16,
-      }}>
-        <div style={{ maxWidth: 1200, margin: '0 auto', width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 16 }}>
-          <Link to="/" style={{ display: 'flex', alignItems: 'center', textDecoration: 'none' }}>
-            <img src="/brand/vvv-digitals-horizontal-light.svg" alt="VVV Digitals" style={{ height: 22, width: 'auto', display: 'block', opacity: 0.7 }} />
-          </Link>
-          <span style={{ fontFamily: MONO, fontSize: 10, color: BDR, letterSpacing: '0.1em' }}>
-            © 2026 VVV Digitals LLC — Glendale, AZ
-          </span>
-        </div>
-      </footer>
+            <div className="credits-grid">
+              <div className="credit-block">
+                <div className="label">Build &amp; Brand</div>
+                <div className="value">
+                  VVV Digitals LLC
+                  <small>Brit · Director of Digital Operations</small>
+                </div>
+              </div>
+              <div className="credit-block">
+                <div className="label">Client</div>
+                <div className="value">
+                  AeroAdix Fabrication Solutions
+                  <small>A division of 3DBoomPrint · Richard Garcia</small>
+                </div>
+              </div>
+              <div className="credit-block">
+                <div className="label">Engagement Window</div>
+                <div className="value">
+                  Feb 14, 2026 → Apr 26, 2026
+                  <small>10 active weeks · 2 phases · final delivery</small>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
 
-      <style>{`
-        @keyframes pulse {
-          0%, 100% { opacity: 1; }
-          50% { opacity: 0.4; }
-        }
-      `}</style>
-    </div>
+        {/* Closing CTA */}
+        <section className="cta">
+          <div className="wrap">
+            <div className="cta-head">
+              <span className="eyebrow">
+                <span className="dot"></span>What's Next
+              </span>
+              <h2>
+                Got a build like this <span className="accent">in mind?</span>
+              </h2>
+            </div>
+
+            <div className="cta-grid">
+              <Link to="/contact" className="cta-card" aria-label="Start a project with VVV Digitals">
+                <span className="label">Start a Project</span>
+                <h3>Tell us about it.</h3>
+                <p>
+                  Production sites, headless commerce, owner-operated CMS systems. Built
+                  end to end, documented, and handed over for good.
+                </p>
+                <span className="arrow">
+                  <span>Get in touch</span>
+                  <span>→</span>
+                </span>
+              </Link>
+
+              <Link to="/work" className="cta-card" aria-label="See more VVV Digitals case studies">
+                <span className="label">More Work</span>
+                <h3>See other builds.</h3>
+                <p>
+                  Browse the rest of the VVV Digitals portfolio — case studies, deliverables,
+                  and live engagements across digital operations and product.
+                </p>
+                <span className="arrow">
+                  <span>View all work</span>
+                  <span>→</span>
+                </span>
+              </Link>
+            </div>
+          </div>
+        </section>
+      </article>
+    </>
   );
-};
-
-export default AeroAdix;
+}
