@@ -83,7 +83,7 @@ const Nav = () => {
                       onMouseLeave={e => e.target.style.color = MID}>Work</Link>
               </>
             )}
-            <a href={isHome ? '#contact' : '/#contact'} style={{
+            <Link to="/contact" style={{
                 ...monoLabel, color: ACC,
                 padding: '8px 20px',
                 border: `1px solid ${ACC}33`,
@@ -92,7 +92,7 @@ const Nav = () => {
               onMouseEnter={e => { e.currentTarget.style.background = `${ACC}18`; e.currentTarget.style.color = TXT; }}
               onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = ACC; }}>
               Contact
-            </a>
+            </Link>
           </nav>
 
           {/* Mobile burger */}
@@ -122,9 +122,9 @@ const Nav = () => {
                       <Link key={to} to={to} style={{ ...monoLabel, color: '#6b7280' }}>{label}</Link>
                     ))
                 }
-                <a href={isHome ? '#contact' : '/#contact'}
-                   style={{ ...monoLabel, color: ACC }}
-                   onClick={() => setMobileOpen(false)}>Contact</a>
+                <Link to="/contact"
+                      style={{ ...monoLabel, color: ACC }}
+                      onClick={() => setMobileOpen(false)}>Contact</Link>
               </div>
             </motion.div>
           )}

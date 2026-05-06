@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, useInView } from 'framer-motion';
 import Nav from '../components/Nav';
+import Footer from '../components/Footer';
 
 // ─── Netlify Forms helper ─────────────────────────────────────────────────────
 const encodeForm = (data) =>
@@ -174,7 +175,7 @@ const IntakeGrader = () => {
       <div style={{ padding: '28px', background: BG, border: `1px solid ${BDR}`, textAlign: 'center' }}>
         <p style={{ fontSize: 16, fontWeight: 700, color: TXT, fontFamily: HEAD, letterSpacing: '0.05em', marginBottom: 6 }}>Want to fix this?</p>
         <p style={{ fontSize: 13, color: MID, marginBottom: 20 }}>I build operational systems that actually work. Most clients see results in 30 days.</p>
-        <a href="#contact" style={{ display: 'inline-block', padding: '12px 36px', background: ACC, color: '#fff', fontSize: 10, fontWeight: 700, letterSpacing: '0.2em', textTransform: 'uppercase', textDecoration: 'none', borderRadius: 2, fontFamily: MONO }}>Request an Audit</a>
+        <Link to="/contact" style={{ display: 'inline-block', padding: '12px 36px', background: ACC, color: '#fff', fontSize: 10, fontWeight: 700, letterSpacing: '0.2em', textTransform: 'uppercase', textDecoration: 'none', borderRadius: 2, fontFamily: MONO }}>Request an Audit</Link>
       </div>
       <button onClick={reset} style={{ display: 'block', margin: '20px auto 0', padding: '8px 20px', background: 'transparent', border: `1px solid ${BDR}`, color: MID, fontSize: 10, fontWeight: 600, letterSpacing: '0.12em', textTransform: 'uppercase', cursor: 'pointer', fontFamily: MONO }}>Retake</button>
     </div>
@@ -269,104 +270,6 @@ const QuickContactForm = () => {
         style={{ ...inp, gridColumn: '1 / -1', resize: 'vertical', minHeight: 64, fontFamily: SANS }}
         onFocus={e => e.target.style.borderColor = ACC} onBlur={e => e.target.style.borderColor = BDR} />
       {st === 'error' && <p style={{ gridColumn: '1 / -1', fontSize: 11, color: '#ef4444', fontFamily: MONO, margin: 0 }}>Something went wrong. Email admin@vvvdigitals.com directly.</p>}
-    </form>
-  );
-};
-
-// ─── Contact Form ─────────────────────────────────────────────────────────────
-const ContactForm = () => {
-  const [f,  setF]  = useState({ name: '', email: '', industry: '', biggest_pain_point: '', message: '', 'bot-field': '' });
-  const [st, setSt] = useState('idle');
-  const u = (k, v) => setF(p => ({ ...p, [k]: v }));
-
-  const submit = async (e) => {
-    e.preventDefault(); setSt('sending');
-    try {
-      const r = await fetch('/', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: encodeForm({ 'form-name': 'contact', ...f }),
-      });
-      if (r.ok) { setSt('sent'); setF({ name: '', email: '', industry: '', biggest_pain_point: '', message: '', 'bot-field': '' }); }
-      else setSt('error');
-    } catch { setSt('error'); }
-  };
-
-  const inp = { width: '100%', padding: '13px 16px', background: '#0c1220', border: `1px solid ${BDR}`, color: TXT, fontSize: 13, fontFamily: SANS, outline: 'none', borderRadius: 2, transition: 'border-color 0.2s' };
-  const lbl = { display: 'block', fontSize: 10, fontWeight: 600, letterSpacing: '0.18em', textTransform: 'uppercase', color: MID, marginBottom: 8, fontFamily: MONO };
-
-  if (st === 'sent') return (
-    <div style={{ textAlign: 'center', padding: '48px 0' }}>
-      <div style={{ width: 48, height: 48, borderRadius: '50%', background: `${ACC}18`, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', marginBottom: 16 }}>
-        <span style={{ color: ACC, fontSize: 22 }}>✓</span>
-      </div>
-      <h3 style={{ fontSize: 28, color: TXT, marginBottom: 8, fontFamily: HEAD, letterSpacing: '0.05em' }}>Message Received.</h3>
-      <p style={{ fontSize: 13, color: MID }}>I'll be in touch within one business day.</p>
-    </div>
-  );
-
-  return (
-    <form
-      name="contact"
-      method="POST"
-      data-netlify="true"
-      data-netlify-honeypot="bot-field"
-      onSubmit={submit}
-      style={{ display: 'flex', flexDirection: 'column', gap: 18 }}
-    >
-      <input type="hidden" name="form-name" value="contact" />
-      <p hidden>
-        <label>Don't fill this out: <input name="bot-field" value={f['bot-field']} onChange={e => u('bot-field', e.target.value)} /></label>
-      </p>
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }} className="vvv-form-row">
-        <div>
-          <label style={lbl}>Name</label>
-          <input required type="text" name="name" value={f.name} onChange={e => u('name', e.target.value)} placeholder="Your name" style={inp}
-            onFocus={e => e.target.style.borderColor = ACC} onBlur={e => e.target.style.borderColor = BDR} />
-        </div>
-        <div>
-          <label style={lbl}>Email</label>
-          <input required type="email" name="email" value={f.email} onChange={e => u('email', e.target.value)} placeholder="you@firm.com" style={inp}
-            onFocus={e => e.target.style.borderColor = ACC} onBlur={e => e.target.style.borderColor = BDR} />
-        </div>
-      </div>
-      <div>
-        <label style={lbl}>Industry</label>
-        <select name="industry" value={f.industry} onChange={e => u('industry', e.target.value)}
-          style={{ ...inp, color: f.industry ? TXT : '#3a4a5e', cursor: 'pointer' }}
-          onFocus={e => e.target.style.borderColor = ACC} onBlur={e => e.target.style.borderColor = BDR}>
-          <option value="" disabled>Select your industry</option>
-          {['Legal','Real Estate','Consulting','Creative Services','Financial Services','Health & Wellness','Coaching / Training','E-Commerce','Construction / Trades','Veteran-Owned Business','Other Service Business'].map(o => <option key={o} value={o}>{o}</option>)}
-        </select>
-      </div>
-      <div>
-        <label style={lbl}>Biggest Pain Point</label>
-        <select name="biggest_pain_point" value={f.biggest_pain_point} onChange={e => u('biggest_pain_point', e.target.value)}
-          style={{ ...inp, color: f.biggest_pain_point ? TXT : '#3a4a5e', cursor: 'pointer' }}
-          onFocus={e => e.target.style.borderColor = ACC} onBlur={e => e.target.style.borderColor = BDR}>
-          <option value="" disabled>What keeps you up at night?</option>
-          {['Client intake is a mess','Losing leads / slow follow-up','Drowning in admin work','No documented systems or SOPs','CRM not set up or underused','Tech stack is overwhelming or underused','Billing and collections','Growing but cannot scale','Need a website or digital presence','Other'].map(o => <option key={o} value={o}>{o}</option>)}
-        </select>
-      </div>
-      <div>
-        <label style={lbl}>Message</label>
-        <textarea required name="message" value={f.message} onChange={e => u('message', e.target.value)}
-          placeholder="Tell me about your business and what you need..." rows={5}
-          style={{ ...inp, resize: 'vertical', minHeight: 110 }}
-          onFocus={e => e.target.style.borderColor = ACC} onBlur={e => e.target.style.borderColor = BDR} />
-      </div>
-      <button type="submit" disabled={st === 'sending'} style={{
-        padding: '14px 40px', background: ACC, color: '#fff',
-        fontSize: 10, fontWeight: 700, letterSpacing: '0.2em', textTransform: 'uppercase',
-        border: 'none', cursor: st === 'sending' ? 'wait' : 'pointer',
-        borderRadius: 2, fontFamily: MONO, opacity: st === 'sending' ? 0.6 : 1,
-        alignSelf: 'flex-start', transition: 'background 0.2s',
-      }}
-        onMouseEnter={e => { if (st !== 'sending') e.target.style.background = ACCL; }}
-        onMouseLeave={e => e.target.style.background = ACC}>
-        {st === 'sending' ? 'Sending...' : 'Send Message'}
-      </button>
-      {st === 'error' && <p style={{ fontSize: 12, color: '#ef4444', fontFamily: MONO }}>Something went wrong. Email admin@vvvdigitals.com directly.</p>}
     </form>
   );
 };
@@ -711,16 +614,16 @@ const Home = () => {
                   </div>
                   <h3 style={{ fontFamily: HEAD, fontSize: 22, color: TXT, letterSpacing: '0.05em', lineHeight: 1.1 }}>{name.toUpperCase()}</h3>
                   <p style={{ fontSize: 13, lineHeight: 1.7, color: '#6b7f99', flex: 1 }}>{desc}</p>
-                  <a href="#contact" style={{
+                  <a href="#" aria-disabled="true" onClick={e => e.preventDefault()} style={{
                     display: 'block', padding: '11px', background: 'transparent',
                     border: `1px solid ${BDR}`, color: MID,
                     fontSize: 10, fontWeight: 600, letterSpacing: '0.15em', textTransform: 'uppercase',
                     textDecoration: 'none', textAlign: 'center', fontFamily: MONO,
-                    transition: 'all 0.2s',
+                    transition: 'all 0.2s', cursor: 'not-allowed', opacity: 0.7,
                   }}
-                    onMouseEnter={e => { e.target.style.borderColor = ACC; e.target.style.color = ACC; }}
+                    onMouseEnter={e => { e.target.style.borderColor = `${ACC}66`; e.target.style.color = `${ACC}99`; }}
                     onMouseLeave={e => { e.target.style.borderColor = BDR; e.target.style.color = MID; }}>
-                    Get Access
+                    Coming Soon
                   </a>
                 </div>
               </FadeUp>
@@ -788,53 +691,7 @@ const Home = () => {
         </div>
       </section>
 
-      <Divider />
-
-      {/* ── CONTACT ── */}
-      <section id="contact" style={{ padding: '100px 0' }}>
-        <div style={sx}>
-          <div className="vvv-contact-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1.4fr', gap: 80, alignItems: 'start' }}>
-            <FadeUp>
-              <Label>Get in Touch</Label>
-              <h2 style={{ fontFamily: HEAD, fontSize: 'clamp(48px, 6vw, 72px)', color: TXT, letterSpacing: '0.03em', marginBottom: 24, lineHeight: 1 }}>
-                LET'S TALK
-              </h2>
-              <p style={{ fontSize: 15, lineHeight: 1.8, color: '#6b7f99', marginBottom: 36 }}>
-                Free 30-minute consultation. Bring your biggest operational problem and I'll tell you exactly what I'd do to fix it.
-              </p>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-                {[
-                  { label: 'Email', value: 'admin@vvvdigitals.com' },
-                  { label: 'Location', value: 'Glendale, AZ (Remote Nationwide)' },
-                  { label: 'Response', value: 'Within 1 Business Day' },
-                ].map(({ label, value }) => (
-                  <div key={label}>
-                    <div style={{ fontFamily: MONO, fontSize: 9, letterSpacing: '0.2em', textTransform: 'uppercase', color: MID, marginBottom: 4 }}>{label}</div>
-                    <div style={{ fontSize: 14, color: TXT }}>{value}</div>
-                  </div>
-                ))}
-              </div>
-            </FadeUp>
-            <FadeUp delay={0.12}>
-              <div style={{ padding: '40px', background: BG2, border: `1px solid ${BDR}` }}>
-                <ContactForm />
-              </div>
-            </FadeUp>
-          </div>
-        </div>
-      </section>
-
-      {/* ── FOOTER ── */}
-      <footer style={{ borderTop: `1px solid ${BDR}`, padding: '28px 32px' }}>
-        <div style={{ maxWidth: 1200, margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 16 }}>
-          <img src="/brand/vvv-digitals-horizontal-light.svg" alt="VVV Digitals" style={{ height: 22, width: 'auto', display: 'block', opacity: 0.7 }} />
-          <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap' }}>
-            <Link to="/privacy" style={{ fontFamily: MONO, fontSize: 9, letterSpacing: '0.12em', textTransform: 'uppercase', color: BDR, textDecoration: 'none' }}>Privacy</Link>
-            <Link to="/terms"   style={{ fontFamily: MONO, fontSize: 9, letterSpacing: '0.12em', textTransform: 'uppercase', color: BDR, textDecoration: 'none' }}>Terms</Link>
-          </div>
-          <span style={{ fontFamily: MONO, fontSize: 10, color: BDR, letterSpacing: '0.1em' }}>© 2026 VVV Digitals LLC</span>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 };

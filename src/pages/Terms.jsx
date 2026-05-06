@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import Nav from '../components/Nav';
+import Footer from '../components/Footer';
 
 const BG  = '#080d14';
 const BDR = '#1a2332';
@@ -40,6 +41,7 @@ const Terms = () => (
         <Link to="/" style={{ fontFamily: MONO, fontSize: 10, letterSpacing: '0.15em', textTransform: 'uppercase', color: ACC, textDecoration: 'none' }}>← Back to Home</Link>
       </div>
     </div>
+    <Footer />
   </div>
 );
 
