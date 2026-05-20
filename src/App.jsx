@@ -7,6 +7,11 @@ import PeriodicTable from './pages/work/PeriodicTable';
 import Contact       from './pages/Contact';
 import Privacy       from './pages/Privacy';
 import Terms         from './pages/Terms';
+import Store         from './pages/Store';
+import ProductPage   from './pages/ProductPage';
+import ThankYou      from './pages/store/ThankYou';
+import VaCalculator  from './pages/tools/VaCalculator';
+import LicenseGate   from './components/store/LicenseGate';
 
 const App = () => (
   <HelmetProvider>
@@ -18,6 +23,17 @@ const App = () => (
         <Route path="/contact"             element={<Contact />} />
         <Route path="/privacy"             element={<Privacy />} />
         <Route path="/terms"               element={<Terms />} />
+        <Route path="/store"               element={<Store />} />
+        <Route path="/store/:slug"         element={<ProductPage />} />
+        <Route path="/store/:slug/thank-you" element={<ThankYou />} />
+        <Route
+          path="/tools/va-calculator"
+          element={
+            <LicenseGate slug="va-toolkit">
+              <VaCalculator />
+            </LicenseGate>
+          }
+        />
       </Routes>
     </BrowserRouter>
   </HelmetProvider>

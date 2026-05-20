@@ -1,0 +1,61 @@
+# =============================================================
+# Netlify build + routing config for VVV Digitals Store
+# =============================================================
+
+[build]
+  command = "npm run build"
+  publish = "dist"
+  functions = "netlify/functions"
+
+# -------------------------------------------------------------
+# Pretty API URLs — frontend can call /api/* and Netlify will
+# route to the corresponding function.
+# -------------------------------------------------------------
+[[redirects]]
+  from = "/api/create-checkout-session"
+  to = "/.netlify/functions/create-checkout-session"
+  status = 200
+
+[[redirects]]
+  from = "/api/stripe-webhook"
+  to = "/.netlify/functions/stripe-webhook"
+  status = 200
+
+[[redirects]]
+  from = "/api/validate-license"
+  to = "/.netlify/functions/validate-license"
+  status = 200
+
+[[redirects]]
+  from = "/api/download"
+  to = "/.netlify/functions/get-download-link"
+  status = 200
+
+# -------------------------------------------------------------
+# SPA fallback — React Router handles all other paths
+# -------------------------------------------------------------
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+# -------------------------------------------------------------
+# Functions: bundle the PDF directory so download function
+# can serve files. Adjust path to match where you place PDFs.
+# -------------------------------------------------------------
+[functions]
+  included_files = ["products/**"]
+
+[functions."stripe-webhook"]
+  # Stripe sends raw body; do NOT have Netlify pre-parse it
+  external_node_modules = ["stripe"]
+
+# -------------------------------------------------------------
+# Headers — basic security defaults
+# -------------------------------------------------------------
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"

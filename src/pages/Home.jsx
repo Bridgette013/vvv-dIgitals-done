@@ -504,7 +504,7 @@ const Home = () => {
                 onMouseEnter={e => e.currentTarget.style.borderColor = `${ACC}55`}
                 onMouseLeave={e => e.currentTarget.style.borderColor = BDR}>
                 <div style={{ aspectRatio: '16/6', overflow: 'hidden', background: BG2 }}>
-                  <img src="/work/aeroadix/screenshots/01-homepage-full.png" alt="AeroAdix" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block', transition: 'transform 0.5s ease' }}
+                  <img src="/og-image.jpg" alt="AeroAdix" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block', transition: 'transform 0.5s ease' }}
                     onMouseEnter={e => e.target.style.transform = 'scale(1.02)'}
                     onMouseLeave={e => e.target.style.transform = 'scale(1)'} />
                 </div>

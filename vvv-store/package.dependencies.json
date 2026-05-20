@@ -1,0 +1,22 @@
+{
+  "_comment": "VVV Digitals Store — dependencies to add to your existing vvvdigitals.com package.json",
+  "_install": "npm install stripe @sendgrid/mail react-router-dom",
+  "dependencies_to_add": {
+    "stripe": "^16.0.0",
+    "@sendgrid/mail": "^8.1.0",
+    "react-router-dom": "^6.22.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "scripts_suggested": {
+    "build": "vite build",
+    "dev": "netlify dev",
+    "preview": "vite preview"
+  },
+  "_notes": [
+    "If your existing vvvdigitals.com project already has react-router-dom, skip that one.",
+    "Netlify Functions run in Node — no bundler needed for them.",
+    "For local dev, install netlify-cli globally: npm install -g netlify-cli, then run `netlify dev` instead of `npm run dev` to test functions."
+  ]
+}
