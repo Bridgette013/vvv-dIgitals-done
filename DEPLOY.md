@@ -25,7 +25,7 @@ Copy the 64-char output. This becomes `LICENSE_HMAC_SECRET` in Netlify. If you e
 | `STRIPE_SECRET_KEY` | `sk_test_…` (testing) or `sk_live_…` (production) | Stripe Dashboard → Developers → API keys |
 | `STRIPE_WEBHOOK_SECRET` | `whsec_…` | From Stripe webhook setup, step 3 below |
 | `SENDGRID_API_KEY` | `SG.…` | SendGrid → Settings → API Keys → create with "Full Access" or scoped to Mail Send |
-| `SENDGRID_FROM_EMAIL` | `store@vvvdigitals.com` | Must be a **verified sender** in SendGrid |
+| `SENDGRID_FROM_EMAIL` | `support@vvvdigitals.com` | Domain `vvvdigitals.com` is already domain-authenticated in SendGrid, so any `@vvvdigitals.com` address works |
 | `LICENSE_HMAC_SECRET` | 64-char hex from step 1 | Never rotate without re-issuing all customer licenses |
 | `SITE_URL` | `https://vvvdigitals.com` | No trailing slash |
 
@@ -57,15 +57,11 @@ After saving, click into the endpoint and **Reveal signing secret**. Copy the `w
 
 ---
 
-## 4. Verify the SendGrid sender
+## 4. SendGrid sender verification
 
-**SendGrid Dashboard → Settings → Sender Authentication**
+**Already done** — `vvvdigitals.com` is domain-authenticated in SendGrid, so any `@vvvdigitals.com` address (`support@`, `store@`, `hello@`, etc.) can send without further setup.
 
-Either:
-- **Single Sender Verification** (fast, one address): verify `store@vvvdigitals.com` by clicking the link they email you.
-- **Domain Authentication** (better deliverability): add the DNS records SendGrid gives you to your `vvvdigitals.com` DNS. Takes ~15 min to propagate.
-
-If the sender isn't verified, every delivery email silently fails — Stripe webhook returns 200, but no email arrives.
+If you ever change the SendGrid account or rotate the domain authentication: see SendGrid → Settings → Sender Authentication. Without an authenticated sender, delivery emails fail silently — the Stripe webhook returns 200, but nothing reaches the buyer's inbox.
 
 ---
 
