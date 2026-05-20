@@ -56,7 +56,7 @@ export function clearLicense(slug) {
 export async function validateLicense(token, slug) {
   if (!token) return { valid: false, reason: 'missing_token' };
   try {
-    const res = await fetch('/api/validate-license', {
+    const res = await fetch('/.netlify/functions/validate-license', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ token, slug }),
