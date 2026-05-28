@@ -4,6 +4,8 @@ import { HelmetProvider } from 'react-helmet-async';
 import Home          from './pages/Home';
 import AeroAdix      from './pages/work/AeroAdix';
 import PeriodicTable from './pages/work/PeriodicTable';
+import HollowayPierce from './pages/work/HollowayPierce';
+import AshbyVale     from './pages/work/AshbyVale';
 import Contact       from './pages/Contact';
 import Privacy       from './pages/Privacy';
 import Terms         from './pages/Terms';
@@ -21,6 +23,8 @@ const App = () => (
         <Route path="/"                    element={<Home />} />
         <Route path="/work/aeroadix"       element={<AeroAdix />} />
         <Route path="/work/periodic-table" element={<PeriodicTable />} />
+        <Route path="/work/holloway-pierce" element={<HollowayPierce />} />
+        <Route path="/work/ashby-vale"     element={<AshbyVale />} />
         <Route path="/contact"             element={<Contact />} />
         <Route path="/privacy"             element={<Privacy />} />
         <Route path="/terms"               element={<Terms />} />
