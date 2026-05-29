@@ -348,7 +348,7 @@ const Home = () => {
       <Nav />
 
       {/* ── HERO ── */}
-      <section style={{ padding: '120px 0 140px', position: 'relative' }}>
+      <section style={{ padding: '120px 0 140px', position: 'relative', overflow: 'hidden' }}>
         <div style={sx}>
           <motion.div
             initial={{ opacity: 0, y: 32 }}
@@ -376,7 +376,9 @@ const Home = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.9, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
               style={{
-                width: '100%', height: 'auto', display: 'block',
+                width: '135%', maxWidth: '135%',
+                height: 'auto', display: 'block',
+                marginLeft: '-17.5%',
                 marginBottom: 40,
               }}
             />
