@@ -342,7 +342,6 @@ const Home = () => {
           .vvv-quickcontact-panel { grid-template-columns: 1fr !important; }
           .vvv-quickcontact  { grid-template-columns: 1fr !important; }
           .vvv-quickcontact button { width: 100% !important; }
-          .vvv-hero-avatar   { display: none !important; }
         }
       `}</style>
 
@@ -357,47 +356,36 @@ const Home = () => {
             transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
             style={{ position: 'relative' }}
           >
-            <Label>Operational Consulting — Small Business Infrastructure</Label>
+            {/* Live H1 + eyebrow + body kept in DOM (visually hidden) for
+                SEO/screen readers; the image below is the visible composition. */}
+            <h1 style={{
+              position: 'absolute', width: 1, height: 1, padding: 0, margin: -1,
+              overflow: 'hidden', clip: 'rect(0,0,0,0)', whiteSpace: 'nowrap', border: 0,
+            }}>
+              Operational Consulting — Small Business Infrastructure.
+              Your business runs on systems. Most are broken.
+              VVV Digitals builds operational systems for small businesses: intake
+              flows, workflows, CRMs, websites, and document systems. Built by an
+              operator with 15 years inside banking, insurance, and risk.
+            </h1>
 
-            {/* Avatar sitting on top of "runs on systems." */}
             <motion.img
-              src="/avata_sitr.png"
-              alt="Brit — Founder, VVV Digitals"
-              className="vvv-hero-avatar"
+              src="/STITCH.png"
+              alt="Your business runs on systems. Most are broken. — VVV Digitals"
               initial={{ opacity: 0, y: 24 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.9, delay: 0.4, ease: [0.22, 1, 0.36, 1] }}
+              transition={{ duration: 0.9, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
               style={{
-                position: 'absolute',
-                right: '20%',
-                bottom: '25%',
-                width: 'clamp(140px, 17vw, 240px)',
-                height: 'auto',
-                pointerEvents: 'none',
-                zIndex: 2,
-                filter: 'drop-shadow(0 12px 32px rgba(0,0,0,0.45))',
+                width: '100%', height: 'auto', display: 'block',
+                marginBottom: 40,
               }}
             />
-
-            <h1 style={{
-              fontFamily: HEAD,
-              fontSize: 'clamp(72px, 10vw, 140px)',
-              lineHeight: 0.92, letterSpacing: '0.02em',
-              color: TXT, marginBottom: 40,
-              position: 'relative', zIndex: 1,
-            }}>
-              Your business<br />runs on systems.<br />
-              <span style={{ color: ACC }}>Most are broken.</span>
-            </h1>
           </motion.div>
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
             style={{ maxWidth: 560 }}>
-            <p style={{ fontSize: 16, lineHeight: 1.8, color: '#6b7f99', marginBottom: 40 }}>
-              15 years in banking, insurance, and risk — now applied to small businesses, solo operators, and veteran-owned companies who need real infrastructure, not guesswork.
-            </p>
             <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap' }} className="vvv-hero-ctas">
               <a href="#tools" style={{
                 padding: '14px 36px', background: ACC, color: '#fff',
