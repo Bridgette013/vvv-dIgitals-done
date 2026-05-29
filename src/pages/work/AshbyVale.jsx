@@ -129,6 +129,47 @@ function firstName(n) {
   return n.split(' ')[0];
 }
 
+// Visitor-narrator panel: breaks the fourth wall to teach the viewer
+// what they're looking at, why this step matters, and what to do next.
+function Narrator({ stage, looking, why, doNext }) {
+  return (
+    <aside className="av-narrator" aria-label="Walkthrough commentary">
+      <div className="av-narrator-tag">
+        <span className="av-narrator-tag-mark">Walkthrough</span>
+        <span className="av-narrator-tag-step">Step {stage} of 4</span>
+      </div>
+      <div className="av-narrator-grid">
+        <div className="av-narrator-cell">
+          <div className="av-narrator-head">What you're looking at</div>
+          <p className="av-narrator-body">{looking}</p>
+        </div>
+        <div className="av-narrator-cell">
+          <div className="av-narrator-head">Why this step</div>
+          <p className="av-narrator-body">{why}</p>
+        </div>
+        <div className="av-narrator-cell">
+          <div className="av-narrator-head">What happens here</div>
+          <p className="av-narrator-body">{doNext}</p>
+        </div>
+      </div>
+    </aside>
+  );
+}
+
+// In-product practice note. Reads as if the firm's system wrote it for
+// the lawyer: calm, no rules talk, just the practical stakes.
+function WhyNote({ title, children }) {
+  return (
+    <div className="av-whynote">
+      <div className="av-whynote-head">
+        <span className="av-whynote-eyebrow">Practice note</span>
+        <span className="av-whynote-title">{title}</span>
+      </div>
+      <div className="av-whynote-body">{children}</div>
+    </div>
+  );
+}
+
 // -- main component ----------------------------------------------------------
 
 export default function AshbyVale() {
@@ -338,39 +379,71 @@ export default function AshbyVale() {
       <main className="av-shell">
         <section className="av-work">
           {stage === 1 && (
-            <Stage1 onAdvance={() => goToStage(2)} />
+            <>
+              <Narrator
+                stage={1}
+                looking="The firm's signing workspace, open to today's appointment. Margaret Chen's complete estate plan is queued in the order it will be executed."
+                why="The signing ceremony is the deliverable. A drafted-but-unsigned plan is worth nothing in probate, so the entire matter exists to reach this one session and run it correctly."
+                doNext="Open the session. The system pulls up the four documents, locks them into the correct signing order, and quietly notes their execution requirements in the background."
+              />
+              <Stage1 onAdvance={() => goToStage(2)} />
+            </>
           )}
           {stage === 2 && (
-            <Stage2
-              witness1={witness1}
-              showSubstitute={showSubstitute}
-              substituteCandidate={substituteCandidate}
-              substituteCatch={substituteCatch}
-              onOpenSubstitute={() => setShowSubstitute(true)}
-              onPick={pickSubstitute}
-              onKeepDaniel={keepDaniel}
-              onAdvance={() => goToStage(3)}
-            />
+            <>
+              <Narrator
+                stage={2}
+                looking="The check-in screen. Four roles need to be in the room before the first signature: the testator, two witnesses, and the notary."
+                why="The single most common way an estate plan gets invalidated later is a witness who shouldn't have been a witness. The system quietly checks witness eligibility now so the lawyer doesn't have to remember to."
+                doNext="Try swapping in Margaret's son as a witness. He's a beneficiary in the will, so the system surfaces a gentle catch instead of letting the lawyer make a costly mistake."
+              />
+              <Stage2
+                witness1={witness1}
+                showSubstitute={showSubstitute}
+                substituteCandidate={substituteCandidate}
+                substituteCatch={substituteCatch}
+                onOpenSubstitute={() => setShowSubstitute(true)}
+                onPick={pickSubstitute}
+                onKeepDaniel={keepDaniel}
+                onAdvance={() => goToStage(3)}
+              />
+            </>
           )}
           {stage === 3 && (
-            <Stage3
-              docIndex={docIndex}
-              docs={DOCS}
-              docState={docState}
-              currentDoc={currentDoc}
-              currentState={currentState}
-              docSignersResolved={docSignersResolved}
-              affidavitSigners={affidavitSigners}
-              showAffidavit={showAffidavit}
-              onSignNext={signNext}
-              onSignNextAffidavit={signNextAffidavit}
-              onMoveToNext={moveToNextDoc}
-              allDocsDone={allDocsDone}
-              onAdvance={() => goToStage(4)}
-            />
+            <>
+              <Narrator
+                stage={3}
+                looking="The signing workspace, document by document. The will signs first; the trust, power of attorney, and healthcare directive follow. Each row shows who signs next."
+                why="Each document has its own execution rules. The system enforces signing order, presence, and (for the will) the self-proving affidavit in the same sitting, so they can't be forgotten or done out of order under the pressure of a real ceremony."
+                doNext="Click Sign for each signer in turn. The will opens its affidavit panel automatically so the witnesses sign both before leaving the room."
+              />
+              <Stage3
+                docIndex={docIndex}
+                docs={DOCS}
+                docState={docState}
+                currentDoc={currentDoc}
+                currentState={currentState}
+                docSignersResolved={docSignersResolved}
+                affidavitSigners={affidavitSigners}
+                showAffidavit={showAffidavit}
+                onSignNext={signNext}
+                onSignNextAffidavit={signNextAffidavit}
+                onMoveToNext={moveToNextDoc}
+                allDocsDone={allDocsDone}
+                onAdvance={() => goToStage(4)}
+              />
+            </>
           )}
           {stage === 4 && (
-            <Stage4 onFile={onFile} />
+            <>
+              <Narrator
+                stage={4}
+                looking="The session close. Margaret leaves with a fully executed estate plan, and the system reveals what was happening underneath the whole time."
+                why="If this plan is ever challenged in probate, decades from now, the proof that it was executed correctly has to already exist. A signing record reconstructed after the fact is worth far less than one captured in the room."
+                doNext="Review the execution record. Every signer, the order, every timestamp, the affidavit, and the notary's acknowledgment were captured as the lawyer worked. Nothing extra to do."
+              />
+              <Stage4 onFile={onFile} />
+            </>
           )}
         </section>
 
@@ -432,6 +505,10 @@ function Stage1({ onAdvance }) {
         Margaret is here for the execution of her estate plan. Four documents are queued in signing order. Everything she drafted with us over the last six weeks lives in this folder.
       </p>
 
+      <WhyNote title="Why the order matters">
+        The will signs first so the self-proving affidavit can be witnessed in the same sitting, while everyone is still in the room. Out of that order, the affidavit gets deferred, the witnesses scatter, and the will becomes harder to admit to probate years from now. The system locks the order so it does not have to be remembered.
+      </WhyNote>
+
       <div className="av-doclist">
         <div className="av-doclist-head">
           <span>Documents queued</span>
@@ -483,6 +560,10 @@ function Stage2({
           <h1 className="av-h1">Check everyone in before the first signature.</h1>
         </div>
       </div>
+
+      <WhyNote title="Why we care who witnesses">
+        A witness who stands to inherit under the will, or who serves as a fiduciary in it, is an interested witness. In many states an interested witness loses their gift; in some, the will itself is at risk. Using two disinterested witnesses, both present, keeps Margaret's plan intact decades from now. The system checks each candidate against the document set before the first signature.
+      </WhyNote>
 
       <div className="av-pcards">
         {cards.map((c) => (
@@ -590,6 +671,10 @@ function Stage3({
         </div>
       </div>
 
+      <WhyNote title="Why this signature, in this seat, right now">
+        Each document has its own formalities. The will needs two witnesses and a notary in the room together, signing in order, with the self-proving affidavit completed in the same sitting. The trust needs a notary but no witnesses. The power of attorney is notarized with a customary witness. The healthcare directive needs two witnesses. The system walks each one in the correct order so nothing gets skipped under the social pressure of a real ceremony.
+      </WhyNote>
+
       <div className="av-docpanel">
         <div className="av-docpanel-head">
           <div>
@@ -684,6 +769,10 @@ function Stage4({ onFile }) {
       <p className="av-lead">
         Margaret's estate plan is fully and validly executed. She leaves today with her will, her trust, her power of attorney, and her healthcare directive in force. Originals go in the vault. Conformed copies go home with her.
       </p>
+
+      <WhyNote title="Why the record matters now">
+        Probate happens after Margaret is gone. By then, witnesses have moved, memories have faded, and a challenger only needs to introduce doubt. A complete execution record captured in the room is the difference between a will that gets admitted in an afternoon and an estate that gets contested for years. The record below was built while the lawyer ran the ceremony, not assembled afterward.
+      </WhyNote>
 
       <div className="av-preserved">
         <div className="av-preserved-head">The record is preserved.</div>
@@ -1527,6 +1616,90 @@ function AshbyStyles() {
 
 /* ------ icons ------ */
 .av-tick { width: 100%; height: 100%; display: block; }
+
+/* ------ narrator (visitor lane) ------ */
+.av-narrator {
+  border-left: 2px solid var(--sage);
+  background: linear-gradient(to right, rgba(92,115,99,0.06), transparent 60%);
+  padding: 18px 22px 22px 24px;
+  margin-bottom: 18px;
+  border-radius: 0 4px 4px 0;
+}
+.av-narrator-tag {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 14px;
+}
+.av-narrator-tag-mark {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--sage);
+}
+.av-narrator-tag-step {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  color: var(--ink-soft);
+  padding-left: 14px;
+  border-left: 1px solid var(--rule);
+}
+.av-narrator-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+@media (max-width: 720px) {
+  .av-narrator-grid { grid-template-columns: 1fr; gap: 14px; }
+}
+.av-narrator-cell { display: flex; flex-direction: column; gap: 4px; }
+.av-narrator-head {
+  font-family: 'Fraunces', serif;
+  font-size: 13px;
+  color: var(--ink);
+  font-weight: 500;
+}
+.av-narrator-body {
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--ink-soft);
+  margin: 0;
+}
+
+/* ------ in-product practice note ------ */
+.av-whynote {
+  border: 1px solid var(--brass-soft);
+  background: rgba(168,129,75,0.05);
+  border-radius: 4px;
+  padding: 16px 20px 18px;
+  margin: 8px 0 24px;
+}
+.av-whynote-head {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+}
+.av-whynote-eyebrow {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--brass);
+}
+.av-whynote-title {
+  font-family: 'Fraunces', serif;
+  font-size: 15px;
+  color: var(--ink);
+}
+.av-whynote-body {
+  font-size: 13.5px;
+  line-height: 1.6;
+  color: var(--ink);
+}
 
 /* ------ animations ------ */
 .av-anim-fade { animation: av-fade-in 280ms ease-out both; }
