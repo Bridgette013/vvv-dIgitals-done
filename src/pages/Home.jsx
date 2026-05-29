@@ -589,6 +589,113 @@ const Home = () => {
               </div>
             </Link>
           </FadeUp>
+
+          <div style={{ height: 24 }} />
+
+          <FadeUp delay={0.2}>
+            <Link to="/work/ashby-vale" style={{ textDecoration: 'none', display: 'block' }}>
+              <div style={{
+                border: `1px solid ${BDR}`, background: BGC,
+                transition: 'border-color 0.3s',
+                overflow: 'hidden',
+              }}
+                onMouseEnter={e => e.currentTarget.style.borderColor = `${ACC}55`}
+                onMouseLeave={e => e.currentTarget.style.borderColor = BDR}>
+                <div style={{
+                  aspectRatio: '16/6',
+                  overflow: 'hidden',
+                  background: 'radial-gradient(ellipse at center, #F4EFE6 0%, #E8DEC9 100%)',
+                  position: 'relative',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}>
+                  <div style={{
+                    position: 'absolute',
+                    inset: 0,
+                    background:
+                      'repeating-linear-gradient(0deg, transparent 0 23px, rgba(27,35,49,0.04) 23px 24px)',
+                  }} />
+                  <div style={{
+                    position: 'relative',
+                    background: '#FBF7F0',
+                    border: '1px solid #D9D1C2',
+                    padding: '28px 40px',
+                    width: '70%',
+                    maxWidth: 560,
+                    boxShadow: '0 8px 24px rgba(27,35,49,0.08)',
+                    fontFamily: "'Fraunces', Georgia, serif",
+                    color: '#1B2331',
+                  }}>
+                    <div style={{
+                      fontSize: 10,
+                      letterSpacing: '0.22em',
+                      textTransform: 'uppercase',
+                      color: '#5C7363',
+                      marginBottom: 10,
+                      fontFamily: "'Inter', sans-serif",
+                    }}>
+                      Today's signing — Chen, M.
+                    </div>
+                    <div style={{ fontSize: 22, fontWeight: 500, marginBottom: 18, letterSpacing: '-0.01em' }}>
+                      Last Will and Testament
+                    </div>
+                    {[
+                      { name: 'Margaret Chen', signed: true },
+                      { name: 'Daniel Ruiz', signed: true },
+                      { name: 'Priya Anand', signed: false },
+                      { name: 'Counsel (notary)', signed: false },
+                    ].map((s, i) => (
+                      <div key={i} style={{
+                        display: 'grid',
+                        gridTemplateColumns: '140px 1fr',
+                        alignItems: 'center',
+                        gap: 12,
+                        padding: '6px 0',
+                        fontSize: 12,
+                      }}>
+                        <span style={{ color: s.signed ? '#1B2331' : '#5C7363' }}>{s.name}</span>
+                        <span style={{
+                          position: 'relative',
+                          height: 18,
+                          borderBottom: '1px solid #1B2331',
+                        }}>
+                          <span style={{
+                            position: 'absolute',
+                            inset: `0 ${s.signed ? 0 : 100}% 0 0`,
+                            borderBottom: '1.5px solid #A8814B',
+                          }} />
+                          {s.signed && (
+                            <span style={{
+                              position: 'absolute',
+                              left: 6, bottom: 1,
+                              fontStyle: 'italic',
+                              fontSize: 13,
+                              color: '#1B2331',
+                            }}>
+                              {s.name.split(' ')[0]}
+                            </span>
+                          )}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                <div style={{ padding: '28px 32px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16, borderTop: `1px solid ${BDR}` }}>
+                  <div>
+                    <div style={{ fontFamily: MONO, fontSize: 9, letterSpacing: '0.2em', textTransform: 'uppercase', color: MID, marginBottom: 6 }}>Case Study — 003</div>
+                    <div style={{ fontFamily: HEAD, fontSize: 32, color: TXT, letterSpacing: '0.05em' }}>ASHBY VALE ESTATE COUNSEL</div>
+                  </div>
+                  <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                    {['React', 'Workflow', 'Compliance', 'Brand System'].map(t => (
+                      <span key={t} style={{ fontFamily: MONO, fontSize: 9, letterSpacing: '0.12em', textTransform: 'uppercase', color: ACC, border: `1px solid ${ACC}33`, padding: '5px 10px' }}>{t}</span>
+                    ))}
+                  </div>
+                  <span style={{ fontFamily: MONO, fontSize: 10, letterSpacing: '0.15em', textTransform: 'uppercase', color: ACC }}>View Case Study →</span>
+                </div>
+              </div>
+            </Link>
+          </FadeUp>
         </div>
       </section>
 
