@@ -1,4 +1,5 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import { Helmet } from 'react-helmet-async';
 import { Link } from 'react-router-dom';
 
@@ -67,6 +68,225 @@ const WITNESS_POOL = [
     disinterested: true, conflict: null },
 ];
 
+// -- tour script -------------------------------------------------------------
+// Each step has a target (data-tour attr), a required stage, copy, an
+// advancement mode, and a placement hint. Visitor either clicks Next on
+// the coachmark, or clicks the highlighted UI element to advance.
+const TOUR = [
+  { id: 'today-signing', stage: 1, target: 'today-signing', placement: 'bottom',
+    title: "Today's appointment",
+    body: "Margaret Chen is here for her estate plan. Four documents are queued in the correct signing order. The system already knows what each one needs.",
+    action: 'next' },
+  { id: 'order-note', stage: 1, target: 'order-note', placement: 'top',
+    title: 'The order is locked',
+    body: "Out of order, the affidavit gets deferred and the witnesses scatter. The system locks the order so the lawyer does not have to remember.",
+    action: 'next' },
+  { id: 'begin-signing', stage: 1, target: 'begin-signing', placement: 'top',
+    title: 'Open the session',
+    body: 'Click the button to begin.',
+    action: 'click-target' },
+
+  { id: 'participants', stage: 2, target: 'participants', placement: 'bottom',
+    title: 'Check everyone in',
+    body: 'Testator, two witnesses, notary. The system runs witness eligibility against every named party in the document set in the background.',
+    action: 'next' },
+  { id: 'witness-check', stage: 2, target: 'witness-check', placement: 'top',
+    title: 'A quiet safeguard',
+    body: "Try substituting in someone present. If the candidate is a beneficiary or fiduciary, the system flags it before the first signature. None of today's witnesses are interested parties.",
+    action: 'next' },
+  { id: 'everyone-here', stage: 2, target: 'everyone-here', placement: 'top',
+    title: 'Continue',
+    body: 'Witnesses are verified. Move into the signing.',
+    action: 'click-target' },
+
+  { id: 'signing-order', stage: 3, target: 'signing-order', placement: 'bottom',
+    title: 'Will first, then the rest',
+    body: "The will signs first so the self-proving affidavit happens in the same sitting. The system will not let the order break.",
+    action: 'next' },
+  { id: 'capture-rail', stage: 3, target: 'capture-rail', placement: 'left',
+    title: 'Captured in the room',
+    body: 'Each signature is timestamped and the witnesses recorded as it happens. No paperwork after the fact. Sign each row to advance.',
+    action: 'next' },
+  { id: 'close-session', stage: 3, target: 'close-session', placement: 'top',
+    title: 'The plan is executed',
+    body: 'All four documents are signed. Close the session.',
+    action: 'click-target' },
+
+  { id: 'preserved-record', stage: 4, target: 'preserved-record', placement: 'top',
+    title: 'The proof already exists',
+    body: 'This is the execution record. Locked, dated, retrievable. If the plan is ever challenged in probate, the evidence is here.',
+    action: 'next' },
+  { id: 'tagline', stage: 4, target: 'tagline', placement: 'top',
+    title: 'What the system did',
+    body: 'Automated compliance, so audit day no longer needs fire drills.',
+    action: 'finish' },
+];
+
+// -- coachmark + dim mask ----------------------------------------------------
+
+function Coachmark({ step, index, total, onNext, onSkip, targetRect }) {
+  if (!targetRect) return null;
+
+  // position the card relative to the target's bounding rect
+  const PADDING = 14;
+  const CARD_W = 320;
+  const cardStyle = {};
+  const arrowSide = step.placement || 'bottom';
+
+  const vw = window.innerWidth;
+  const vh = window.innerHeight;
+  let top = 0; let left = 0;
+  if (arrowSide === 'bottom') {
+    top = targetRect.bottom + PADDING;
+    left = targetRect.left + targetRect.width / 2 - CARD_W / 2;
+  } else if (arrowSide === 'top') {
+    top = targetRect.top - PADDING - 8;
+    left = targetRect.left + targetRect.width / 2 - CARD_W / 2;
+  } else if (arrowSide === 'left') {
+    top = targetRect.top + targetRect.height / 2;
+    left = targetRect.left - CARD_W - PADDING;
+  } else if (arrowSide === 'right') {
+    top = targetRect.top + targetRect.height / 2;
+    left = targetRect.right + PADDING;
+  }
+  // clamp inside viewport
+  left = Math.max(12, Math.min(left, vw - CARD_W - 12));
+  top = Math.max(12, Math.min(top, vh - 220));
+  // for 'top' placement, push card up by its height (approx) instead of down
+  const useTransformY = arrowSide === 'top' ? 'translateY(-100%)' : '';
+  Object.assign(cardStyle, {
+    top: `${top}px`,
+    left: `${left}px`,
+    width: `${CARD_W}px`,
+    transform: useTransformY,
+  });
+
+  return (
+    <div className="av-cm" style={cardStyle} role="dialog" aria-labelledby="av-cm-title">
+      <div className={`av-cm-tail av-cm-tail-${arrowSide}`} />
+      <div className="av-cm-head">
+        <span className="av-cm-step">{String(index + 1).padStart(2, '0')} / {String(total).padStart(2, '0')}</span>
+        <button type="button" className="av-cm-skip" onClick={onSkip}>Skip tour</button>
+      </div>
+      <div className="av-cm-title" id="av-cm-title">{step.title}</div>
+      <p className="av-cm-body">{step.body}</p>
+      <div className="av-cm-actions">
+        {step.action === 'click-target' && (
+          <span className="av-cm-hint">Click the highlighted button</span>
+        )}
+        {step.action === 'next' && (
+          <button type="button" className="av-cm-next" onClick={onNext}>Next →</button>
+        )}
+        {step.action === 'finish' && (
+          <button type="button" className="av-cm-next" onClick={onNext}>Finish ✓</button>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// Floating mini-card pinned to bottom-right when the target isn't on
+// screen yet. Keeps the visitor oriented and offers skip/next without
+// blocking the system UI.
+function CoachmarkFallback({ step, index, total, onNext, onSkip }) {
+  return (
+    <div className="av-cm av-cm-floating" role="dialog">
+      <div className="av-cm-head">
+        <span className="av-cm-step">{String(index + 1).padStart(2, '0')} / {String(total).padStart(2, '0')}</span>
+        <button type="button" className="av-cm-skip" onClick={onSkip}>Skip tour</button>
+      </div>
+      <div className="av-cm-title">{step.title}</div>
+      <p className="av-cm-body">{step.body}</p>
+      <div className="av-cm-actions">
+        {step.action === 'click-target' && (
+          <span className="av-cm-hint">Keep going in the system</span>
+        )}
+        {step.action !== 'click-target' && (
+          <button type="button" className="av-cm-next" onClick={onNext}>
+            {step.action === 'finish' ? 'Finish ✓' : 'Next →'}
+          </button>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function DimMask({ targetRect }) {
+  if (!targetRect) {
+    // full screen dim before target locks in
+    return <div className="av-dim av-dim-full" />;
+  }
+  const PAD = 10;
+  const r = {
+    top: Math.max(0, targetRect.top - PAD),
+    left: Math.max(0, targetRect.left - PAD),
+    width: targetRect.width + PAD * 2,
+    height: targetRect.height + PAD * 2,
+  };
+  return (
+    <>
+      <div className="av-dim" style={{ top: 0, left: 0, right: 0, height: r.top }} />
+      <div className="av-dim" style={{ top: r.top, left: 0, width: r.left, height: r.height }} />
+      <div className="av-dim" style={{ top: r.top, left: r.left + r.width, right: 0, height: r.height }} />
+      <div className="av-dim" style={{ top: r.top + r.height, left: 0, right: 0, bottom: 0 }} />
+      <div className="av-cm-ring" style={{ top: r.top, left: r.left, width: r.width, height: r.height }} />
+    </>
+  );
+}
+
+// hook: tracks bounding rect of element matching [data-tour=name] across
+// scroll, resize, and stage changes. Polls briefly until target mounts.
+function useTargetRect(targetName, deps = []) {
+  const [rect, setRect] = useState(null);
+
+  useEffect(() => {
+    if (!targetName) { setRect(null); return; }
+    let mounted = true;
+    let raf = 0;
+    let pollTimer = 0;
+
+    const measure = () => {
+      const el = document.querySelector(`[data-tour="${targetName}"]`);
+      if (!mounted) return;
+      if (el) {
+        const r = el.getBoundingClientRect();
+        setRect({ top: r.top, left: r.left, right: r.right, bottom: r.bottom, width: r.width, height: r.height });
+      } else {
+        setRect(null);
+      }
+    };
+
+    const onScrollOrResize = () => {
+      cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(measure);
+    };
+
+    // initial poll (target may mount after stage transitions)
+    let tries = 0;
+    const poll = () => {
+      measure();
+      tries += 1;
+      if (!document.querySelector(`[data-tour="${targetName}"]`) && tries < 30) {
+        pollTimer = window.setTimeout(poll, 50);
+      }
+    };
+    poll();
+
+    window.addEventListener('scroll', onScrollOrResize, true);
+    window.addEventListener('resize', onScrollOrResize);
+    return () => {
+      mounted = false;
+      cancelAnimationFrame(raf);
+      window.clearTimeout(pollTimer);
+      window.removeEventListener('scroll', onScrollOrResize, true);
+      window.removeEventListener('resize', onScrollOrResize);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [targetName, ...deps]);
+
+  return rect;
+}
+
 // -- tiny visual primitives --------------------------------------------------
 
 function Tooltip({ label, children }) {
@@ -129,33 +349,6 @@ function firstName(n) {
   return n.split(' ')[0];
 }
 
-// Visitor-narrator panel: breaks the fourth wall to teach the viewer
-// what they're looking at, why this step matters, and what to do next.
-function Narrator({ stage, looking, why, doNext }) {
-  return (
-    <aside className="av-narrator" aria-label="Walkthrough commentary">
-      <div className="av-narrator-tag">
-        <span className="av-narrator-tag-mark">Walkthrough</span>
-        <span className="av-narrator-tag-step">Step {stage} of 4</span>
-      </div>
-      <div className="av-narrator-grid">
-        <div className="av-narrator-cell">
-          <div className="av-narrator-head">What you're looking at</div>
-          <p className="av-narrator-body">{looking}</p>
-        </div>
-        <div className="av-narrator-cell">
-          <div className="av-narrator-head">Why this step</div>
-          <p className="av-narrator-body">{why}</p>
-        </div>
-        <div className="av-narrator-cell">
-          <div className="av-narrator-head">What happens here</div>
-          <p className="av-narrator-body">{doNext}</p>
-        </div>
-      </div>
-    </aside>
-  );
-}
-
 // In-product practice note. Reads as if the firm's system wrote it for
 // the lawyer: calm, no rules talk, just the practical stakes.
 function WhyNote({ title, children }) {
@@ -174,6 +367,47 @@ function WhyNote({ title, children }) {
 
 export default function AshbyVale() {
   const [stage, setStage] = useState(1);
+
+  // tour state
+  const [tourIndex, setTourIndex] = useState(0);
+  const [tourActive, setTourActive] = useState(true);
+  const currentTour = tourActive ? TOUR[tourIndex] : null;
+  const targetName = currentTour && currentTour.stage === stage ? currentTour.target : null;
+  const targetRect = useTargetRect(targetName, [stage, tourIndex, tourActive]);
+
+  const nextTour = useCallback(() => {
+    setTourIndex((i) => {
+      if (i + 1 >= TOUR.length) {
+        setTourActive(false);
+        return i;
+      }
+      return i + 1;
+    });
+  }, []);
+  const skipTour = useCallback(() => setTourActive(false), []);
+
+  // click-target steps: when the visitor clicks the highlighted element,
+  // advance the tour at the same time the real handler fires. Re-query on
+  // each render in case the target re-mounts after a stage transition.
+  useEffect(() => {
+    if (!currentTour || currentTour.action !== 'click-target') return;
+    if (currentTour.stage !== stage) return;
+    let cleanup = null;
+    let attempts = 0;
+    const tryAttach = () => {
+      const el = document.querySelector(`[data-tour="${currentTour.target}"]`);
+      if (el) {
+        const handler = () => setTimeout(() => nextTour(), 60);
+        el.addEventListener('click', handler, { once: true });
+        cleanup = () => el.removeEventListener('click', handler);
+      } else if (attempts < 20) {
+        attempts += 1;
+        window.setTimeout(tryAttach, 50);
+      }
+    };
+    tryAttach();
+    return () => { if (cleanup) cleanup(); };
+  }, [currentTour, stage, nextTour]);
 
   // participants
   const [present, setPresent] = useState({
@@ -379,75 +613,43 @@ export default function AshbyVale() {
       <main className="av-shell">
         <section className="av-work">
           {stage === 1 && (
-            <>
-              <Narrator
-                stage={1}
-                looking="The firm's signing workspace, open to today's appointment. Margaret Chen's complete estate plan is queued in the order it will be executed."
-                why="The signing ceremony is the deliverable. A drafted-but-unsigned plan is worth nothing in probate, so the entire matter exists to reach this one session and run it correctly."
-                doNext="Open the session. The system pulls up the four documents, locks them into the correct signing order, and quietly notes their execution requirements in the background."
-              />
-              <Stage1 onAdvance={() => goToStage(2)} />
-            </>
+            <Stage1 onAdvance={() => goToStage(2)} />
           )}
           {stage === 2 && (
-            <>
-              <Narrator
-                stage={2}
-                looking="The check-in screen. Four roles need to be in the room before the first signature: the testator, two witnesses, and the notary."
-                why="The single most common way an estate plan gets invalidated later is a witness who shouldn't have been a witness. The system quietly checks witness eligibility now so the lawyer doesn't have to remember to."
-                doNext="Try swapping in Margaret's son as a witness. He's a beneficiary in the will, so the system surfaces a gentle catch instead of letting the lawyer make a costly mistake."
-              />
-              <Stage2
-                witness1={witness1}
-                showSubstitute={showSubstitute}
-                substituteCandidate={substituteCandidate}
-                substituteCatch={substituteCatch}
-                onOpenSubstitute={() => setShowSubstitute(true)}
-                onPick={pickSubstitute}
-                onKeepDaniel={keepDaniel}
-                onAdvance={() => goToStage(3)}
-              />
-            </>
+            <Stage2
+              witness1={witness1}
+              showSubstitute={showSubstitute}
+              substituteCandidate={substituteCandidate}
+              substituteCatch={substituteCatch}
+              onOpenSubstitute={() => setShowSubstitute(true)}
+              onPick={pickSubstitute}
+              onKeepDaniel={keepDaniel}
+              onAdvance={() => goToStage(3)}
+            />
           )}
           {stage === 3 && (
-            <>
-              <Narrator
-                stage={3}
-                looking="The signing workspace, document by document. The will signs first; the trust, power of attorney, and healthcare directive follow. Each row shows who signs next."
-                why="Each document has its own execution rules. The system enforces signing order, presence, and (for the will) the self-proving affidavit in the same sitting, so they can't be forgotten or done out of order under the pressure of a real ceremony."
-                doNext="Click Sign for each signer in turn. The will opens its affidavit panel automatically so the witnesses sign both before leaving the room."
-              />
-              <Stage3
-                docIndex={docIndex}
-                docs={DOCS}
-                docState={docState}
-                currentDoc={currentDoc}
-                currentState={currentState}
-                docSignersResolved={docSignersResolved}
-                affidavitSigners={affidavitSigners}
-                showAffidavit={showAffidavit}
-                onSignNext={signNext}
-                onSignNextAffidavit={signNextAffidavit}
-                onMoveToNext={moveToNextDoc}
-                allDocsDone={allDocsDone}
-                onAdvance={() => goToStage(4)}
-              />
-            </>
+            <Stage3
+              docIndex={docIndex}
+              docs={DOCS}
+              docState={docState}
+              currentDoc={currentDoc}
+              currentState={currentState}
+              docSignersResolved={docSignersResolved}
+              affidavitSigners={affidavitSigners}
+              showAffidavit={showAffidavit}
+              onSignNext={signNext}
+              onSignNextAffidavit={signNextAffidavit}
+              onMoveToNext={moveToNextDoc}
+              allDocsDone={allDocsDone}
+              onAdvance={() => goToStage(4)}
+            />
           )}
           {stage === 4 && (
-            <>
-              <Narrator
-                stage={4}
-                looking="The session close. Margaret leaves with a fully executed estate plan, and the system reveals what was happening underneath the whole time."
-                why="If this plan is ever challenged in probate, decades from now, the proof that it was executed correctly has to already exist. A signing record reconstructed after the fact is worth far less than one captured in the room."
-                doNext="Review the execution record. Every signer, the order, every timestamp, the affidavit, and the notary's acknowledgment were captured as the lawyer worked. Nothing extra to do."
-              />
-              <Stage4 onFile={onFile} />
-            </>
+            <Stage4 onFile={onFile} />
           )}
         </section>
 
-        <aside className="av-rail" aria-label="On File">
+        <aside className="av-rail" aria-label="On File" data-tour="capture-rail">
           <div className="av-rail-head">
             <Seal />
             <div>
@@ -473,7 +675,7 @@ export default function AshbyVale() {
             <span className="av-foot-mark">Ashby Vale Estate Counsel</span>
             <span className="av-foot-meta">Wills · Trusts · Legacy Planning</span>
           </div>
-          <div className="av-foot-tag">
+          <div className="av-foot-tag" data-tour="tagline">
             Automated compliance, so audit day no longer needs fire drills.
           </div>
           <div className="av-foot-back">
@@ -481,6 +683,38 @@ export default function AshbyVale() {
           </div>
         </div>
       </footer>
+
+      {tourActive && currentTour && createPortal(
+        <div className="av-cs av-tour-layer" aria-live="polite">
+          {/* Only dim when target is available AND on the right stage,
+              so an out-of-sync tour never blackholes the page. */}
+          {currentTour.stage === stage && targetRect && (
+            <DimMask targetRect={targetRect} />
+          )}
+          {currentTour.stage === stage && targetRect ? (
+            <Coachmark
+              step={currentTour}
+              index={tourIndex}
+              total={TOUR.length}
+              onNext={nextTour}
+              onSkip={skipTour}
+              targetRect={targetRect}
+            />
+          ) : (
+            // Floating fallback card if the target isn't on screen yet.
+            // Lets the visitor continue interacting with the system to
+            // bring the element into being, with skip/next still available.
+            <CoachmarkFallback
+              step={currentTour}
+              index={tourIndex}
+              total={TOUR.length}
+              onNext={nextTour}
+              onSkip={skipTour}
+            />
+          )}
+        </div>,
+        document.body,
+      )}
     </div>
   );
 }
@@ -490,7 +724,7 @@ export default function AshbyVale() {
 function Stage1({ onAdvance }) {
   return (
     <div className="av-card av-anim-fade">
-      <div className="av-card-head">
+      <div className="av-card-head" data-tour="today-signing">
         <div>
           <div className="av-eyebrow">Today's signing</div>
           <h1 className="av-h1">Margaret Chen <span className="av-h1-meta">· Estate plan · Conference Room 2</span></h1>
@@ -505,9 +739,11 @@ function Stage1({ onAdvance }) {
         Margaret is here for the execution of her estate plan. Four documents are queued in signing order. Everything she drafted with us over the last six weeks lives in this folder.
       </p>
 
-      <WhyNote title="Why the order matters">
-        The will signs first so the self-proving affidavit can be witnessed in the same sitting, while everyone is still in the room. Out of that order, the affidavit gets deferred, the witnesses scatter, and the will becomes harder to admit to probate years from now. The system locks the order so it does not have to be remembered.
-      </WhyNote>
+      <div data-tour="order-note">
+        <WhyNote title="Why the order matters">
+          The will signs first so the self-proving affidavit can be witnessed in the same sitting, while everyone is still in the room. Out of that order, the affidavit gets deferred, the witnesses scatter, and the will becomes harder to admit to probate years from now. The system locks the order so it does not have to be remembered.
+        </WhyNote>
+      </div>
 
       <div className="av-doclist">
         <div className="av-doclist-head">
@@ -531,7 +767,7 @@ function Stage1({ onAdvance }) {
       </div>
 
       <div className="av-cta-row">
-        <button type="button" className="av-btn av-btn-primary" onClick={onAdvance}>
+        <button type="button" className="av-btn av-btn-primary" onClick={onAdvance} data-tour="begin-signing">
           Begin the signing →
         </button>
       </div>
@@ -565,7 +801,7 @@ function Stage2({
         A witness who stands to inherit under the will, or who serves as a fiduciary in it, is an interested witness. In many states an interested witness loses their gift; in some, the will itself is at risk. Using two disinterested witnesses, both present, keeps Margaret's plan intact decades from now. The system checks each candidate against the document set before the first signature.
       </WhyNote>
 
-      <div className="av-pcards">
+      <div className="av-pcards" data-tour="participants">
         {cards.map((c) => (
           <div key={c.role} className="av-pcard">
             <div className="av-pcard-role">{c.role}</div>
@@ -580,7 +816,7 @@ function Stage2({
         ))}
       </div>
 
-      <div className="av-substitute">
+      <div className="av-substitute" data-tour="witness-check">
         {!showSubstitute && (
           <button type="button" className="av-link-subtle" onClick={onOpenSubstitute}>
             Need to substitute a witness?
@@ -630,6 +866,7 @@ function Stage2({
           className="av-btn av-btn-primary"
           onClick={onAdvance}
           disabled={!witness1.disinterested}
+          data-tour="everyone-here"
         >
           Everyone is here →
         </button>
@@ -658,7 +895,7 @@ function Stage3({
             <span className="av-h1-meta"> · stay seated until each instrument is complete</span>
           </h1>
         </div>
-        <div className="av-docnav">
+        <div className="av-docnav" data-tour="signing-order">
           {docs.map((d, i) => (
             <span
               key={d.id}
@@ -743,7 +980,7 @@ function Stage3({
           <div className="av-docfoot">
             <span className="av-docfoot-rule" />
             <span className="av-docfoot-msg">All four documents are executed.</span>
-            <button type="button" className="av-btn av-btn-primary" onClick={onAdvance}>
+            <button type="button" className="av-btn av-btn-primary" onClick={onAdvance} data-tour="close-session">
               Close the session →
             </button>
           </div>
@@ -774,7 +1011,7 @@ function Stage4({ onFile }) {
         Probate happens after Margaret is gone. By then, witnesses have moved, memories have faded, and a challenger only needs to introduce doubt. A complete execution record captured in the room is the difference between a will that gets admitted in an afternoon and an estate that gets contested for years. The record below was built while the lawyer ran the ceremony, not assembled afterward.
       </WhyNote>
 
-      <div className="av-preserved">
+      <div className="av-preserved" data-tour="preserved-record">
         <div className="av-preserved-head">The record is preserved.</div>
         <p className="av-preserved-body">
           Every signer, the order, every timestamp, the witnesses' attestations, the self-proving affidavit, and the notary's acknowledgment, already on file under this matter.
@@ -1617,57 +1854,6 @@ function AshbyStyles() {
 /* ------ icons ------ */
 .av-tick { width: 100%; height: 100%; display: block; }
 
-/* ------ narrator (visitor lane) ------ */
-.av-narrator {
-  border-left: 2px solid var(--sage);
-  background: linear-gradient(to right, rgba(92,115,99,0.06), transparent 60%);
-  padding: 18px 22px 22px 24px;
-  margin-bottom: 18px;
-  border-radius: 0 4px 4px 0;
-}
-.av-narrator-tag {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  margin-bottom: 14px;
-}
-.av-narrator-tag-mark {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 10px;
-  letter-spacing: 0.22em;
-  text-transform: uppercase;
-  color: var(--sage);
-}
-.av-narrator-tag-step {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 10px;
-  letter-spacing: 0.18em;
-  color: var(--ink-soft);
-  padding-left: 14px;
-  border-left: 1px solid var(--rule);
-}
-.av-narrator-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 20px;
-}
-@media (max-width: 720px) {
-  .av-narrator-grid { grid-template-columns: 1fr; gap: 14px; }
-}
-.av-narrator-cell { display: flex; flex-direction: column; gap: 4px; }
-.av-narrator-head {
-  font-family: 'Fraunces', serif;
-  font-size: 13px;
-  color: var(--ink);
-  font-weight: 500;
-}
-.av-narrator-body {
-  font-size: 13px;
-  line-height: 1.55;
-  color: var(--ink-soft);
-  margin: 0;
-}
-
 /* ------ in-product practice note ------ */
 .av-whynote {
   border: 1px solid var(--brass-soft);
@@ -1699,6 +1885,138 @@ function AshbyStyles() {
   font-size: 13.5px;
   line-height: 1.6;
   color: var(--ink);
+}
+
+/* ------ tour layer (portal at body) ------ */
+.av-tour-layer { position: fixed; inset: 0; z-index: 9999; pointer-events: none; }
+.av-tour-layer .av-cm,
+.av-tour-layer .av-dim,
+.av-tour-layer .av-cm-ring { pointer-events: auto; }
+.av-dim {
+  position: fixed;
+  background: rgba(11, 16, 22, 0.58);
+  transition: opacity 200ms ease;
+}
+.av-dim-full { inset: 0; }
+.av-cm-ring {
+  position: fixed;
+  border: 1.5px solid var(--brass);
+  border-radius: 6px;
+  box-shadow: 0 0 0 9999px rgba(0,0,0,0), 0 8px 28px rgba(168,129,75,0.25);
+  pointer-events: none;
+  animation: av-ring-pulse 1800ms ease-out infinite;
+}
+@keyframes av-ring-pulse {
+  0%   { box-shadow: 0 0 0 0 rgba(168,129,75,0.45); }
+  60%  { box-shadow: 0 0 0 10px rgba(168,129,75,0); }
+  100% { box-shadow: 0 0 0 0 rgba(168,129,75,0); }
+}
+
+.av-cm {
+  position: fixed;
+  background: var(--paper);
+  border: 1px solid var(--rule);
+  border-radius: 6px;
+  box-shadow: 0 12px 36px rgba(0,0,0,0.35);
+  padding: 18px 20px 16px;
+  font-family: 'Inter', sans-serif;
+  color: var(--ink);
+  animation: av-cm-in 240ms ease-out both;
+}
+@keyframes av-cm-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.av-cm-tail {
+  position: absolute;
+  width: 12px; height: 12px;
+  background: var(--paper);
+  border: 1px solid var(--rule);
+  transform: rotate(45deg);
+}
+.av-cm-tail-bottom { top: -7px; left: 50%; margin-left: -6px; border-right: none; border-bottom: none; }
+.av-cm-tail-top    { bottom: -7px; left: 50%; margin-left: -6px; border-left: none; border-top: none; }
+.av-cm-tail-left   { top: 50%; right: -7px; margin-top: -6px; border-left: none; border-bottom: none; }
+.av-cm-tail-right  { top: 50%; left: -7px; margin-top: -6px; border-right: none; border-top: none; }
+
+.av-cm-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+.av-cm-step {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  color: var(--sage);
+}
+.av-cm-skip {
+  background: none;
+  border: none;
+  color: var(--ink-soft);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  border-bottom: 1px dashed var(--rule);
+  padding: 0 0 1px;
+  cursor: pointer;
+}
+.av-cm-skip:hover { color: var(--ink); border-bottom-color: var(--ink-soft); }
+.av-cm-title {
+  font-family: 'Fraunces', serif;
+  font-size: 18px;
+  font-weight: 500;
+  color: var(--ink);
+  margin-bottom: 6px;
+  letter-spacing: -0.01em;
+}
+.av-cm-body {
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--ink-soft);
+  margin: 0 0 14px;
+}
+.av-cm-actions {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+}
+.av-cm-hint {
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--brass);
+  font-family: 'JetBrains Mono', monospace;
+}
+.av-cm-next {
+  font-family: 'Inter', sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  background: var(--ink);
+  color: var(--vellum);
+  border: 1px solid var(--ink);
+  padding: 8px 16px;
+  border-radius: 3px;
+  cursor: pointer;
+  transition: background 120ms ease, border-color 120ms ease;
+}
+.av-cm-next:hover { background: var(--brass); border-color: var(--brass); }
+
+.av-cm-floating {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  left: auto !important;
+  top: auto !important;
+  width: 320px !important;
+  transform: none !important;
+}
+.av-cm-floating .av-cm-tail { display: none; }
+
+@media (max-width: 600px) {
+  .av-cm { width: calc(100vw - 24px) !important; left: 12px !important; }
+  .av-cm-floating { right: 12px; bottom: 12px; }
 }
 
 /* ------ animations ------ */
