@@ -685,7 +685,7 @@ export default function AshbyVale() {
       </footer>
 
       {tourActive && currentTour && createPortal(
-        <div className="av-cs av-tour-layer" aria-live="polite">
+        <div className="av-tour-layer av-cs-vars" aria-live="polite">
           {/* Only dim when target is available AND on the right stage,
               so an out-of-sync tour never blackholes the page. */}
           {currentTour.stage === stage && targetRect && (
@@ -1888,14 +1888,31 @@ function AshbyStyles() {
 }
 
 /* ------ tour layer (portal at body) ------ */
+/* Carries the firm's CSS custom properties so coachmark styles below
+   resolve, but does NOT paint any background or take space. */
+.av-cs-vars {
+  --ink: #1B2331;
+  --ink-soft: #3A4454;
+  --parchment: #F4EFE6;
+  --vellum: #FBF7F0;
+  --paper: #FFFDF7;
+  --sage: #5C7363;
+  --sage-soft: #7A8F80;
+  --brass: #A8814B;
+  --brass-soft: #C5A06A;
+  --rule: #D9D1C2;
+  --rule-soft: #E7E0CF;
+  font-family: 'Inter', system-ui, sans-serif;
+}
 .av-tour-layer { position: fixed; inset: 0; z-index: 9999; pointer-events: none; }
-.av-tour-layer .av-cm,
-.av-tour-layer .av-dim,
-.av-tour-layer .av-cm-ring { pointer-events: auto; }
+/* Only the coachmark card captures clicks; the dim mask is click-through
+   so the visitor can interact with the highlighted UI underneath. */
+.av-tour-layer .av-cm { pointer-events: auto; }
 .av-dim {
   position: fixed;
-  background: rgba(11, 16, 22, 0.58);
+  background: rgba(11, 16, 22, 0.55);
   transition: opacity 200ms ease;
+  pointer-events: none;
 }
 .av-dim-full { inset: 0; }
 .av-cm-ring {
